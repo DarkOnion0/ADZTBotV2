@@ -1,13 +1,18 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
 var (
@@ -82,6 +87,34 @@ func init() {
 }
 
 func main() {
+	/*
+		MongoBD initialisation
+	*/
+	client, errMongo := mongo.NewClient(options.Client().ApplyURI(os.Getenv("ADZTBotV2_DB_URL")))
+	if errMongo != nil {
+		log.Fatal(errMongo)
+	}
+
+	log.Println("Connecting to MongoDB...")
+
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	errMongo = client.Connect(ctx)
+	if errMongo != nil {
+		log.Fatal(errMongo)
+	}
+
+	errMongo = client.Ping(ctx, readpref.Primary())
+	if errMongo != nil {
+		log.Fatal(errMongo)
+	}
+
+	log.Println("DB is connected !")
+
+	defer client.Disconnect(ctx)
+
+	/*
+		Discordgo initialisation
+	*/
 	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
 		log.Println("Bot is up!")
 	})
@@ -107,5 +140,5 @@ func main() {
 	stop := make(chan os.Signal)
 	signal.Notify(stop, os.Interrupt)
 	<-stop
-	log.Println("Gracefully shutting down")
+	log.Println("Gracefully shutting down...")
 }
