@@ -1,4 +1,4 @@
-module github.com/DarkOnion0/DarkBotV2
+module DarkBotV2
 
 go 1.16
 
