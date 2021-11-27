@@ -6,7 +6,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 
-	"DarkBotV2/db"
+	"ADZTBotV2/db"
 )
 
 var (

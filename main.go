@@ -2,33 +2,25 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"log"
 	"os"
 	"os/signal"
 	"time"
 
-	"DarkBotV2/commands"
-	"DarkBotV2/config"
+	"ADZTBotV2/commands"
+	"ADZTBotV2/config"
 	"github.com/bwmarrin/discordgo"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-var (
-	GuildID  = flag.String("guild", "", "Test guild ID. If not passed - bot registers commands.Commands globally")
-	BotToken = flag.String("token", "", "Bot access token")
-)
-
 var s *discordgo.Session
-
-func init() { flag.Parse() }
 
 func init() {
 	var err error
-	s, err = discordgo.New("Bot " + *BotToken)
+	s, err = discordgo.New("Bot " + *config.BotToken)
 	if err != nil {
 		log.Fatalf("Invalid bot parameters: %v", err)
 	}
@@ -48,7 +40,7 @@ func main() {
 	*/
 
 	var errMongo error
-	config.Client, errMongo = mongo.NewClient(options.Client().ApplyURI(config.DBUrl))
+	config.Client, errMongo = mongo.NewClient(options.Client().ApplyURI(*config.DBUrl))
 
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 
@@ -79,7 +71,7 @@ func main() {
 	}
 
 	for _, v := range commands.Commands {
-		_, err := s.ApplicationCommandCreate(s.State.User.ID, *GuildID, v)
+		_, err := s.ApplicationCommandCreate(s.State.User.ID, *config.GuildID, v)
 		if err != nil {
 			log.Panicf("Cannot create '%v' command: %v", v.Name, err)
 		}
