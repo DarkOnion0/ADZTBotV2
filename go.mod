@@ -1,4 +1,4 @@
-module DarkBotV2
+module ADZTBotV2
 
 go 1.16
 
