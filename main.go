@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"DarkBotV2/commands"
+	"DarkBotV2/config"
 	"github.com/bwmarrin/discordgo"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -45,31 +46,30 @@ func main() {
 	/*
 		MongoBD initialisation
 	*/
-	client, errMongo := mongo.NewClient(options.Client().ApplyURI(os.Getenv("ADZTBotV2_DB_URL")))
-	if errMongo != nil {
-		log.Fatal(errMongo)
-	}
 
-	log.Println("Connecting to MongoDB...")
+	var errMongo error
+	config.Client, errMongo = mongo.NewClient(options.Client().ApplyURI(config.DBUrl))
 
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	errMongo = client.Connect(ctx)
+
+	errMongo = config.Client.Connect(ctx)
 	if errMongo != nil {
 		log.Fatal(errMongo)
 	}
 
-	errMongo = client.Ping(ctx, readpref.Primary())
+	errMongo = config.Client.Ping(ctx, readpref.Primary())
 	if errMongo != nil {
 		log.Fatal(errMongo)
 	}
 
 	log.Println("DB is connected !")
 
-	defer client.Disconnect(ctx)
+	defer config.Client.Disconnect(ctx)
 
 	/*
 		Discordgo initialisation
 	*/
+
 	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
 		log.Println("Bot is up!")
 	})
