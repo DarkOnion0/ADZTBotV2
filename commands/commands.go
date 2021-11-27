@@ -5,6 +5,8 @@ import (
 	"log"
 
 	"github.com/bwmarrin/discordgo"
+
+	"DarkBotV2/db"
 )
 
 var (
@@ -38,7 +40,17 @@ var (
 			}
 		},
 		"register": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			userId := fmt.Sprintf("Thanks %s, your have been successfully registered", i.Member.Mention())
+			var userId string
+
+			if i.Member != nil {
+				userId = fmt.Sprintf("Thanks %s, your have been successfully registered", i.Member.Mention())
+				db.RegisterUser(i.Member.User.ID)
+			} else {
+				userId = fmt.Sprintf("Thanks %s, your have been successfully registered", i.User.Mention())
+				db.RegisterUser(i.User.ID)
+				log.Printf("Register command has been triggerd by %s", i.User.ID)
+			}
+
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
