@@ -25,6 +25,34 @@ var (
 			// of the command.
 			Description: "The first command you must type before starting using the bot !",
 		},
+		{
+			Name:        "post",
+			Description: "Publish a video or a music in a channel",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Name:        "kind",
+					Description: "The type of post you want to publish",
+					Type:        discordgo.ApplicationCommandOptionString,
+					Choices: []*discordgo.ApplicationCommandOptionChoice{
+						{
+							Name:  "music",
+							Value: "music",
+						},
+						{
+							Name:  "video",
+							Value: "video",
+						},
+					},
+					Required: true,
+				},
+				{
+					Name:        "url",
+					Description: "The link of your publication",
+					Type:        discordgo.ApplicationCommandOptionString,
+					Required:    true,
+				},
+			},
+		},
 	}
 	CommandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 		"basic-command": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -45,6 +73,7 @@ var (
 			if i.Member != nil {
 				userId = fmt.Sprintf("Thanks %s, your have been successfully registered", i.Member.Mention())
 				db.RegisterUser(i.Member.User.ID)
+				log.Printf("Register command has been triggerd by %s", i.Member.User.ID)
 			} else {
 				userId = fmt.Sprintf("Thanks %s, your have been successfully registered", i.User.Mention())
 				db.RegisterUser(i.User.ID)
@@ -61,6 +90,9 @@ var (
 				log.Fatalf("An error occured while creting command handler for the basic-command: %s", err)
 				return
 			}
+		},
+		"post": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			fmt.Printf("The interaction passed, ARG1=%s ARG2=%s", i.ApplicationCommandData().Options[0].StringValue(), i.ApplicationCommandData().Options[1].StringValue())
 		},
 	}
 )
