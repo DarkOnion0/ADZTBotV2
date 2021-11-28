@@ -16,13 +16,8 @@ type userRecord struct {
 	Userid string
 }
 
-type CheckUserT struct {
-	UserExist    bool
-	UserObjectId primitive.ObjectID
-}
-
 // CheckUser function check if a user exists in the database according to his discord id
-func CheckUser(userId string) CheckUserT {
+func CheckUser(userId string) (bool, primitive.ObjectID) {
 	userInfoCollection := config.Client.Database(*config.DBName).Collection("userInfo")
 
 	var userList userRecord
@@ -33,16 +28,17 @@ func CheckUser(userId string) CheckUserT {
 
 	if len(userList.Userid) == 0 {
 		log.Printf("User %s doesn't exist in the database", userId)
-		return CheckUserT{UserObjectId: userList.ID, UserExist: false}
+		return false, userList.ID
 	} else {
 		log.Printf("User %s already exists in the database", userId)
-		return CheckUserT{UserObjectId: userList.ID, UserExist: true}
+		return true, userList.ID
 	}
 }
 
 // RegisterUser register a user if it doesn't exist in the database using his discord id
 func RegisterUser(userId string) {
-	if !CheckUser(userId).UserExist {
+	userStatus, _ := CheckUser(userId)
+	if !userStatus {
 		userInfoCollection := config.Client.Database(*config.DBName).Collection("userInfo")
 		ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 		info, _ := userInfoCollection.InsertOne(ctx, userRecord{Userid: userId})
