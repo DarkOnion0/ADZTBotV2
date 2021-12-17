@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"ADZTBotV2/config"
 	"github.com/bwmarrin/discordgo"
 
 	"ADZTBotV2/db"
@@ -68,14 +69,14 @@ var (
 			}
 		},
 		"register": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			var userId string
+			var registerMessage string
 
 			if i.Member != nil {
-				userId = fmt.Sprintf("Thanks %s, your have been successfully registered", i.Member.Mention())
+				registerMessage = fmt.Sprintf("Thanks %s, your have been successfully registered", i.Member.Mention())
 				db.RegisterUser(i.Member.User.ID)
 				log.Printf("Register command has been triggerd by %s", i.Member.User.ID)
 			} else {
-				userId = fmt.Sprintf("Thanks %s, your have been successfully registered", i.User.Mention())
+				registerMessage = fmt.Sprintf("Thanks %s, your have been successfully registered", i.User.Mention())
 				db.RegisterUser(i.User.ID)
 				log.Printf("Register command has been triggerd by %s", i.User.ID)
 			}
@@ -83,16 +84,84 @@ var (
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: userId,
+					Content: registerMessage,
 				},
 			})
 			if err != nil {
-				log.Fatalf("An error occured while creting command handler for the basic-command: %s", err)
+				log.Fatalf("An error occured while responding to the register command interaction: %s", err)
 				return
 			}
 		},
 		"post": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			fmt.Printf("The interaction passed, ARG1=%s ARG2=%s", i.ApplicationCommandData().Options[0].StringValue(), i.ApplicationCommandData().Options[1].StringValue())
+
+			var userDiscord *discordgo.User
+
+			if i.Member != nil {
+				userDiscord = i.Member.User
+				log.Printf("Post command has been triggerd by %s", i.Member.User.ID)
+			} else {
+				userDiscord = i.User
+				log.Printf("Post command has been triggerd by %s", i.User.ID)
+			}
+
+			// check if user exist in the db
+			userExists, userDbId := db.CheckUser(userDiscord.ID)
+
+			// execute this block only if the user exist in the db
+			if userExists {
+				// execute this block if the post does not exist in the database
+				postExist, postId := db.Post(userDbId, i.ApplicationCommandData().Options[0].StringValue(), i.ApplicationCommandData().Options[1].StringValue())
+				if !postExist {
+					err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+						Type: discordgo.InteractionResponseChannelMessageWithSource,
+						Data: &discordgo.InteractionResponseData{
+							Content: "Your post has been successfully registered",
+						},
+					})
+					if err != nil {
+						log.Fatalf("An error occured while responding to the register post interaction: %s", err)
+					}
+
+					message := fmt.Sprintf("**Posted by:** \t\t\t %s \n**PostID:** \t\t\t %s \n**Link:** \t\t\t %s", userDiscord.Mention(), postId, i.ApplicationCommandData().Options[1].StringValue())
+
+					if i.ApplicationCommandData().Options[0].StringValue() == "music" {
+						_, err2 := s.ChannelMessageSend(*config.ChannelMusic, message)
+
+						if err2 != nil {
+							log.Fatalf("An error occured while sending the music message: %s", err2)
+						}
+					} else {
+						_, err2 := s.ChannelMessageSend(*config.ChannelVideo, message)
+
+						if err2 != nil {
+							log.Fatalf("An error occured while sending the video message: %s", err2)
+						}
+					}
+
+				} else {
+					err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+						Type: discordgo.InteractionResponseChannelMessageWithSource,
+						Data: &discordgo.InteractionResponseData{
+							Content: "Sorry but this link already exist in the database 🤷",
+						},
+					})
+					if err != nil {
+						log.Fatalf("An error occured while responding to the register post interaction: %s", err)
+					}
+				}
+
+			} else {
+				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: "Sorry but your a not register in the bot database 😭",
+					},
+				})
+				if err != nil {
+					log.Fatalf("An error occured while responding to the register post interaction: %s", err)
+				}
+			}
 		},
 	}
 )
