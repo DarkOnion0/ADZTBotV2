@@ -40,7 +40,9 @@ func RegisterUser(userId string) {
 	userStatus, _ := CheckUser(userId)
 	if !userStatus {
 		userInfoCollection := config.Client.Database(*config.DBName).Collection("userInfo")
+
 		ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+
 		info, _ := userInfoCollection.InsertOne(ctx, userRecord{Userid: userId})
 		log.Printf("A new user has been added to the database; userid=%s dbId=%s", userId, info.InsertedID)
 	}
