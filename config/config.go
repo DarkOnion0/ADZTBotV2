@@ -11,9 +11,11 @@ func init() {
 }
 
 var (
-	Client   *mongo.Client
-	DBName   = flag.String("db", "", "The mongodb database name")
-	DBUrl    = flag.String("url", "", "The mongodb access url")
-	GuildID  = flag.String("guild", "", "Test guild ID. If not passed - bot registers commands.Commands globally")
-	BotToken = flag.String("token", "", "Bot access token")
+	Client       *mongo.Client
+	DBName       = flag.String("db", "", "The mongodb database name")
+	DBUrl        = flag.String("url", "", "The mongodb access url")
+	GuildID      = flag.String("guild", "", "Test guild ID. If not passed - bot registers commands.Commands globally")
+	BotToken     = flag.String("token", "", "Bot access token")
+	ChannelMusic = flag.String("chanm", "", "Bot access token")
+	ChannelVideo = flag.String("chanv", "", "Bot access token")
 )
