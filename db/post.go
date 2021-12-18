@@ -27,13 +27,13 @@ type postVote struct {
 }
 
 func Post(userDbId primitive.ObjectID, postType, postUrl string) (bool, string) {
-	userInfoCollection := config.Client.Database(*config.DBName).Collection("post")
+	postCollection := config.Client.Database(*config.DBName).Collection("post")
 
 	var postRecordFetch postRecord
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	err1 := userInfoCollection.FindOne(ctx, bson.D{{"Url", strings.Split(postUrl, "?si=")[0]}}).Decode(&postRecordFetch)
+	err1 := postCollection.FindOne(ctx, bson.D{{"url", strings.Split(postUrl, "?si=")[0]}}).Decode(&postRecordFetch)
 
-	fmt.Println(err1)
+	//fmt.Println(err1, strings.Split(postUrl, "?si=")[0])
 
 	if err1 != nil {
 		if err1 == mongo.ErrNoDocuments {
