@@ -54,6 +54,34 @@ var (
 				},
 			},
 		},
+		{
+			Name:        "vote",
+			Description: "Like or Dislike the post you want",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Name:        "postid",
+					Description: "The id of the publication you want",
+					Type:        discordgo.ApplicationCommandOptionString,
+					Required:    true,
+				},
+				{
+					Name:        "vote",
+					Description: "Like or Dislike",
+					Type:        discordgo.ApplicationCommandOptionString,
+					Choices: []*discordgo.ApplicationCommandOptionChoice{
+						{
+							Name:  "like",
+							Value: "+",
+						},
+						{
+							Name:  "dislike",
+							Value: "-",
+						},
+					},
+					Required: true,
+				},
+			},
+		},
 	}
 	CommandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 		"basic-command": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -93,7 +121,7 @@ var (
 			}
 		},
 		"post": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			fmt.Printf("The interaction passed, ARG1=%s ARG2=%s", i.ApplicationCommandData().Options[0].StringValue(), i.ApplicationCommandData().Options[1].StringValue())
+			//fmt.Printf("The interaction passed, ARG1=%s ARG2=%s", i.ApplicationCommandData().Options[0].StringValue(), i.ApplicationCommandData().Options[1].StringValue())
 
 			var userDiscord *discordgo.User
 
@@ -162,6 +190,69 @@ var (
 					log.Fatalf("An error occured while responding to the register post interaction: %s", err)
 				}
 			}
+		},
+		"vote": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			var userDiscord *discordgo.User
+
+			if i.Member != nil {
+				userDiscord = i.Member.User
+				log.Printf("Post command has been triggerd by %s", i.Member.User.ID)
+			} else {
+				userDiscord = i.User
+				log.Printf("Post command has been triggerd by %s", i.User.ID)
+			}
+
+			// check if user exist in the db
+			userExists, userDbId := db.CheckUser(userDiscord.ID)
+
+			// execute this block only if the user exist in the db
+			if userExists {
+				err1, b := db.Vote(i.ApplicationCommandData().Options[0].StringValue(), i.ApplicationCommandData().Options[1].StringValue(), userDbId)
+
+				if err1 != nil {
+					err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+						Type: discordgo.InteractionResponseChannelMessageWithSource,
+						Data: &discordgo.InteractionResponseData{
+							Content: fmt.Sprintf("An error occured while executing the vote function: %s", err1),
+						},
+					})
+					if err != nil {
+						log.Fatalf("An error occured while responding to the vote interaction: %s", err)
+					}
+					log.Fatalf("An error occured while executing the vote function: %s", err1)
+				} else {
+
+					var postStatus string
+
+					if b {
+						postStatus = "added"
+					} else {
+						postStatus = "updated"
+					}
+
+					err2 := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+						Type: discordgo.InteractionResponseChannelMessageWithSource,
+						Data: &discordgo.InteractionResponseData{
+							Content: fmt.Sprintf("Your vote has been successfuly %s for the post %s", postStatus, i.ApplicationCommandData().Options[0].StringValue()),
+						},
+					})
+
+					if err2 != nil {
+						log.Fatalf("An error occured while respondinf to the register post interaction: %s", err2)
+					}
+				}
+			} else {
+				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: "Sorry but your a not register in the bot database 😭",
+					},
+				})
+				if err != nil {
+					log.Fatalf("An error occured while responding to the register post interaction: %s", err)
+				}
+			}
+
 		},
 	}
 )
