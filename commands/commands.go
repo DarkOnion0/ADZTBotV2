@@ -123,7 +123,7 @@ var (
 						log.Fatalf("An error occured while responding to the register post interaction: %s", err)
 					}
 
-					message := fmt.Sprintf("**Posted by:** \t\t\t %s \n**PostID:** \t\t\t %s \n**Link:** \t\t\t %s", userDiscord.Mention(), postId, i.ApplicationCommandData().Options[1].StringValue())
+					message := fmt.Sprintf("**Posted by:**              %s \n**PostID:**                    %s \n**Link:**                         %s", userDiscord.Mention(), postId, i.ApplicationCommandData().Options[1].StringValue())
 
 					if i.ApplicationCommandData().Options[0].StringValue() == "music" {
 						_, err2 := s.ChannelMessageSend(*config.ChannelMusic, message)
