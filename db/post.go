@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strings"
 	"time"
@@ -42,9 +41,9 @@ func Post(userDbId primitive.ObjectID, postType, postUrl string) (bool, string) 
 
 			ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 
-			info, _ := postCollection.InsertOne(ctx, postRecord{Type: postType, Url: strings.Split(postUrl, "?si=")[0], User: userDbId, VoteList: []postVote{}})
-			log.Printf("A new user post has been added to the database; userDbId=%s url=%s type=%s dbId=%s", userDbId, postUrl, postType, info.InsertedID)
-			return false, fmt.Sprintf("%s", info.InsertedID)
+			info, _ := postCollection.InsertOne(ctx, postRecord{Type: postType, Url: strings.Split(postUrl, "?si=")[0], User: userDbId, VoteList: []postVote{{User: userDbId, Vote: "+"}}})
+			log.Printf("A new user post has been added to the database; userDbId=%s url=%s type=%s dbId=%s", userDbId, postUrl, postType, info.InsertedID.(primitive.ObjectID).Hex())
+			return false, info.InsertedID.(primitive.ObjectID).Hex()
 		}
 		log.Fatalf("Somethings bad append while fetching the post url in the Post function: %s", err1)
 	} else {
