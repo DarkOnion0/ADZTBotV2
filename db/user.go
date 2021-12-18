@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -11,8 +12,12 @@ import (
 )
 
 // This is the datastructures of every mongodb record in the userInfo collection
-type userRecord struct {
+type userRecordFetch struct {
 	ID     primitive.ObjectID `bson:"_id" json:"id,omitempty"`
+	Userid string
+}
+type userRecordSend struct {
+	//ID     primitive.ObjectID `bson:"_id" json:"id,omitempty"`
 	Userid string
 }
 
@@ -20,11 +25,11 @@ type userRecord struct {
 func CheckUser(userId string) (bool, primitive.ObjectID) {
 	userInfoCollection := config.Client.Database(*config.DBName).Collection("userInfo")
 
-	var userList userRecord
+	var userList userRecordFetch
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	_ = userInfoCollection.FindOne(ctx, bson.D{{"userid", userId}}).Decode(&userList)
 
-	//fmt.Println(userList, userId)
+	fmt.Println(userList.Userid, userId)
 
 	if len(userList.Userid) == 0 {
 		log.Printf("User %s doesn't exist in the database", userId)
@@ -43,7 +48,8 @@ func RegisterUser(userId string) {
 
 		ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 
-		info, _ := userInfoCollection.InsertOne(ctx, userRecord{Userid: userId})
+		info, _ := userInfoCollection.InsertOne(ctx, userRecordSend{Userid: userId})
+		fmt.Println(info, userId)
 		log.Printf("A new user has been added to the database; userid=%s dbId=%s", userId, info.InsertedID)
 	}
 }
