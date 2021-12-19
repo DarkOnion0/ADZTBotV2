@@ -105,7 +105,7 @@ func Vote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 			ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 
 			_, _ = postCollection.UpdateOne(ctx, bson.M{"_id": postIdPrimitive}, bson.D{
-				{"$set", bson.D{{"voteList", append(postRecordFetch.VoteList, postVote{User: userId, Vote: userVote})}}},
+				{"$set", bson.D{{"votelist", append(postRecordFetch.VoteList, postVote{User: userId, Vote: userVote})}}},
 			})
 			log.Printf("Add a vote; postId=%s userVote=%s userId=%s", postId, userVote, userId.Hex())
 
@@ -114,7 +114,7 @@ func Vote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 			ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 
 			_, _ = postCollection.UpdateOne(ctx, bson.M{"_id": postIdPrimitive}, bson.D{
-				{"$set", bson.D{{"voteList", postRecordFetch}}},
+				{"$set", bson.D{{"votelist", postRecordFetch.VoteList}}},
 			})
 			log.Printf("Update a vote; postId=%s userVote=%s userId=%s", postId, userVote, userId.Hex())
 
