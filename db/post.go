@@ -66,10 +66,10 @@ func Post(userDbId primitive.ObjectID, postType, postUrl string) (bool, string) 
 	return true, ""
 }
 
-// The Vote function add or remove a like to post (set with the Post function)
+// The SetVote function add or remove a like to post (set with the Post function)
 //
 // NOTE: it will return true if the post has been added and false if not
-func Vote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
+func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 
 	postCollection := config.Client.Database(*config.DBName).Collection("post")
 	postIdPrimitive, err1 := primitive.ObjectIDFromHex(postId)
@@ -123,4 +123,53 @@ func Vote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 	}
 
 	return errors.New("the function shouldn't arrive there"), false
+}
+
+func GetVote(postId string, userId primitive.ObjectID) (err error, globalVote int, userVote string, postFetch postRecordFetchT) {
+	userVote = "You haven't yet vote on this post 😅"
+	globalVote = 0
+	postCollection := config.Client.Database(*config.DBName).Collection("post")
+	postIdPrimitive, err1 := primitive.ObjectIDFromHex(postId)
+
+	if err1 != nil {
+		log.Fatalf("An error occured while convertign the post hex ObjectID to the primitve.ObjectID")
+	}
+
+	var postRecordFetch postRecordFetchT
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	err2 := postCollection.FindOne(ctx, bson.D{{"_id", postIdPrimitive}}).Decode(&postRecordFetch)
+
+	//fmt.Println(err2, strings.Split(postUrl, "?si=")[0])
+
+	if err2 != nil {
+		if err2 == mongo.ErrNoDocuments {
+			return errors.New("the postID is not valid"), globalVote, userVote, postRecordFetchT{}
+		}
+		log.Fatalf("An error occured while fetching the post: %s", err2)
+		//return errors.New("An error occurred while fetching the post"), false
+	} else {
+		err = nil
+
+		for i := 0; i < len(postRecordFetch.VoteList); i++ {
+			if postRecordFetch.VoteList[i].User == userId {
+				if postRecordFetch.VoteList[i].Vote == "+" {
+					userVote = "Like 👍"
+					globalVote += 1
+				} else {
+					userVote = "Dislike 👎"
+					globalVote += -1
+				}
+			} else {
+				if postRecordFetch.VoteList[i].Vote == "+" {
+					globalVote += 1
+				} else {
+					globalVote += -1
+				}
+			}
+		}
+
+		return err, globalVote, userVote, postRecordFetch
+	}
+
+	return errors.New("the function shouldn't arrive there"), globalVote, userVote, postRecordFetchT{}
 }
