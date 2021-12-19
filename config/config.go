@@ -16,6 +16,6 @@ var (
 	DBUrl        = flag.String("url", "", "The mongodb access url")
 	GuildID      = flag.String("guild", "", "Test guild ID. If not passed - bot registers commands.Commands globally")
 	BotToken     = flag.String("token", "", "Bot access token")
-	ChannelMusic = flag.String("chanm", "", "Bot access token")
-	ChannelVideo = flag.String("chanv", "", "Bot access token")
+	ChannelMusic = flag.String("chanm", "", "Discord channel id where the post of the music category will be sent to")
+	ChannelVideo = flag.String("chanv", "", "Discord channel id where the post of the video category will be sent to")
 )
