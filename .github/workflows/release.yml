@@ -1,0 +1,48 @@
+name: Release Actions
+
+on:
+ release:
+    types: [published]
+
+env:
+  GO_VERSION: 1.16.x
+
+jobs:
+  build-project:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: ${{ env.GO_VERSION }}
+
+    - name: Make script executable
+      run: chmod +x ./build.sh
+    
+    - name: Build
+      run: ./build.sh
+      
+    - uses: actions/upload-artifact@v2
+      with:
+        name: build
+        path: ./bin/*.zip        
+        
+  upload-binary:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: writte
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: actions/download-artifact@v2
+      with:
+        name: build
+        path: ./bin
+   
+    - name: GitHub CLI login
+      run: gh auth login --with-token ${{ secrets.GITHUB_TOKEN }}}
+      
+    - name: Publish binary
+      run: gh release upload ${GITHUB_REF} ./bin/*
