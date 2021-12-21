@@ -9,26 +9,35 @@ on:
 env:
   GO_VERSION: 1.16.x
 
-jobs:
-
-  build:
+jobs:      
+  format:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+     - name: Check out code
+       uses: actions/checkout@v2
+       
+     - name: Set up Go ${{ env.GO_VERSION }}
+       uses: actions/setup-go@v2
+       with:
+         go-version: ${{ env.GO_VERSION }}
+     - name: Format code
+       run: gofmt -w .
 
-    - name: Set up Go ${{ env.GO_VERSION }}
-      uses: actions/setup-go@v2
-      with:
-        go-version: ${{ env.GO_VERSION }}
+     - name: Check go.mod/go.sum
+       run: |
+         echo "check if go.mod and go.sum are up to date"
+         go mod tidy
+         git diff --exit-code go.mod go.sum
+         
+     - name: Commit formatted code
+       uses: stefanzweifel/git-auto-commit-action@v4
+       with:
+         commit_message: format code with gofmt, `GithubCI`
+         branch: ${{ github.head_ref }}
 
-    - name: Build
-      run: go build -v ./...
-
-    - name: Test
-      run: go test -v ./...
-  
-  lint-and-format:
+  lint:
     runs-on: ubuntu-latest
+    needs: format
     steps:
     - name: Check out code
       uses: actions/checkout@v2
@@ -45,16 +54,19 @@ jobs:
         args: --verbose --timeout 5m
         skip-go-installation: true
 
-    - name: Format code
-      run: gofmt -w .
+  build:
+    runs-on: ubuntu-latest
+    needs: [format, lint]
+    steps:
+    - uses: actions/checkout@v2
 
-    - name: Check go.mod/go.sum
-      run: |
-        echo "check if go.mod and go.sum are up to date"
-        go mod tidy
-        git diff --exit-code go.mod go.sum
-    - name: Commit formatted code
-      uses: stefanzweifel/git-auto-commit-action@v4
+    - name: Set up Go ${{ env.GO_VERSION }}
+      uses: actions/setup-go@v2
       with:
-        commit_message: format code with gofmt, `GithubCI`
-        branch: ${{ github.head_ref }}
+        go-version: ${{ env.GO_VERSION }}
+
+    - name: Build
+      run: go build -v ./...
+
+    - name: Test
+      run: go test -v ./...
