@@ -61,7 +61,7 @@ func main() {
 
 	log.Println("DB is connected !")
 
-	defer func (c *mongo.Client) {
+	defer func(c *mongo.Client) {
 		err := c.Disconnect(ctx)
 		if err != nil {
 			log.Fatalf("An error occured whle closing the bot: %s", err)
