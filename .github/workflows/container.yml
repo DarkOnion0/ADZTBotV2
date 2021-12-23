@@ -27,12 +27,9 @@ jobs:
       - name: Log in to registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | buildah login -u ${{ github.actor }} --password-stdin ${{ env.CONTAINER_REGISTRY }}
 
-      - name: Build image for linux
+      - name: Build image
         run: |
-          buildah bud --platform="linux/amd64" -t ${{ env.IMAGE_NAME }} .
-          buildah bud --platform="linux/386" -t ${{ env.IMAGE_NAME }} .
-          buildah bud --platform="linux/arm64" -t ${{ env.IMAGE_NAME }} .
-          buildah bud --platform="linux/arm" -t ${{ env.IMAGE_NAME }} .
+          buildah bud --platform="linux/amd64" --platform="linux/386" --platform="linux/arm64" --platform="linux/arm" -t ${{ env.IMAGE_NAME }} .
 
       # - name: Build image for Windows
       #   run: |
