@@ -1,4 +1,4 @@
-name: Release Actions
+name: Release Binary
 
 on:
   release:
