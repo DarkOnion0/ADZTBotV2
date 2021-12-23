@@ -34,15 +34,15 @@ jobs:
           buildah bud --platform="linux/arm64" -t ${{ env.IMAGE_NAME }} .
           buildah bud --platform="linux/arm" -t ${{ env.IMAGE_NAME }} .
 
-      # - name: Build image for Windows
-      #   run: |
-      #     buildah bud --platform="windows/amd64" -t ${{ env.IMAGE_NAME }} .
-      #     buildah bud --platform="windows/386" -t ${{ env.IMAGE_NAME }} .
+      - name: Build image for Windows
+        run: |
+          buildah bud --platform="windows/amd64" -t ${{ env.IMAGE_NAME }} .
+          buildah bud --platform="windows/386" -t ${{ env.IMAGE_NAME }} .
 
-      # - name: Build image for Mac
-      #   run: |
-      #     buildah bud --platform="darwin/amd64" -t ${{ env.IMAGE_NAME }} .
-      #     buildah bud --platform="darwin/arm64" -t ${{ env.IMAGE_NAME }} .
+      - name: Build image for Mac
+        run: |
+          buildah bud --platform="darwin/amd64" -t ${{ env.IMAGE_NAME }} .
+          buildah bud --platform="darwin/arm64" -t ${{ env.IMAGE_NAME }} .
 
       - name: Push image
         run: |
@@ -58,7 +58,7 @@ jobs:
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
 
           # Use `latest` tag convention
-          [ "$VERSION" == "master" ] && VERSION=latest
+          [ "$VERSION" == "main" ] && VERSION=latest
 
           buildah tag $IMAGE_NAME $IMAGE_ID:$VERSION
           buildah push $IMAGE_ID:$VERSION 

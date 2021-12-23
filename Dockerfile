@@ -1,4 +1,4 @@
-FROM golang:1.16
+FROM docker.io/library/golang:1.16 as builder
 
 WORKDIR /src/adztbotv2
 
@@ -13,7 +13,15 @@ COPY go.sum .
 
 # Donwload and Install project
 RUN go get -d -v ./...
-RUN go install -v ./...
+RUN go -o ADZTBotV2 main.go
+
+---
+
+FROM alpine:latest
+
+WORKDIR /src/adztbotv2
+
+COPY --from=builder /src/adztbotv2/ADZTBotV2 /src/adztbotv2/
 
 # Env variables
 ENV DB none
