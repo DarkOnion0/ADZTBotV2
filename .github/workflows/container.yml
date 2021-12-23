@@ -34,15 +34,15 @@ jobs:
           buildah bud --platform="linux/arm64" -t ${{ env.IMAGE_NAME }} .
           buildah bud --platform="linux/arm" -t ${{ env.IMAGE_NAME }} .
 
-      - name: Build image for Windows
-        run: |
-          buildah bud --platform="windows/amd64" -t ${{ env.IMAGE_NAME }} .
-          buildah bud --platform="windows/386" -t ${{ env.IMAGE_NAME }} .
+      # - name: Build image for Windows
+      #   run: |
+      #     buildah bud --platform="windows/amd64" -t ${{ env.IMAGE_NAME }} .
+      #     buildah bud --platform="windows/386" -t ${{ env.IMAGE_NAME }} .
 
-      - name: Build image for Mac
-        run: |
-          buildah bud --platform="darwin/amd64" -t ${{ env.IMAGE_NAME }} .
-          buildah bud --platform="darwin/arm64" -t ${{ env.IMAGE_NAME }} .
+      # - name: Build image for Mac
+      #   run: |
+      #     buildah bud --platform="darwin/amd64" -t ${{ env.IMAGE_NAME }} .
+      #     buildah bud --platform="darwin/arm64" -t ${{ env.IMAGE_NAME }} .
 
       - name: Push image
         run: |
