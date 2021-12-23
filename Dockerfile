@@ -13,7 +13,7 @@ COPY go.sum .
 
 # Donwload and Install project
 RUN go get -d -v ./...
-RUN go -o ADZTBotV2 main.go
+RUN go build -o ADZTBotV2 main.go
 
 ---
 
