@@ -31,7 +31,7 @@ func CheckUser(userId string) (bool, primitive.ObjectID) {
 	var userList userRecordFetch
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	_ = userInfoCollection.FindOne(ctx, bson.D{{"userid", userId}}).Decode(&userList)
+	_ = userInfoCollection.FindOne(ctx, bson.D{{Key: "userid", Value: userId}}).Decode(&userList)
 
 	//fmt.Println(userList.Userid, userId)
 
@@ -65,7 +65,7 @@ func GetUser(userDbId primitive.ObjectID) (err error, userId string) {
 	var userList userRecordFetch
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	err1 := userInfoCollection.FindOne(ctx, bson.D{{"_id", userDbId}}).Decode(&userList)
+	err1 := userInfoCollection.FindOne(ctx, bson.D{{Key: "_id", Value: userDbId}}).Decode(&userList)
 
 	//fmt.Println(userList.Userid, userId)
 

@@ -46,7 +46,7 @@ func Post(userDbId primitive.ObjectID, postType, postUrl string) (bool, string) 
 	var postRecordFetch postRecordFetchT
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	err1 := postCollection.FindOne(ctx, bson.D{{"url", strings.Split(postUrl, "?si=")[0]}}).Decode(&postRecordFetch)
+	err1 := postCollection.FindOne(ctx, bson.D{{Key: "url", Value: strings.Split(postUrl, "?si=")[0]}}).Decode(&postRecordFetch)
 
 	//fmt.Println(err1, strings.Split(postUrl, "?si=")[0])
 
@@ -84,7 +84,7 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 	var postRecordFetch postRecordFetchT
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	err2 := postCollection.FindOne(ctx, bson.D{{"_id", postIdPrimitive}}).Decode(&postRecordFetch)
+	err2 := postCollection.FindOne(ctx, bson.D{{Key: "_id", Value: postIdPrimitive}}).Decode(&postRecordFetch)
 
 	//fmt.Println(err2, strings.Split(postUrl, "?si=")[0])
 
@@ -110,7 +110,7 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 			defer cancel()
 
 			_, _ = postCollection.UpdateOne(ctx, bson.M{"_id": postIdPrimitive}, bson.D{
-				{"$set", bson.D{{"votelist", append(postRecordFetch.VoteList, postVote{User: userId, Vote: userVote})}}},
+				{Key: "$set", Value: bson.D{{Key: "votelist", Value: append(postRecordFetch.VoteList, postVote{User: userId, Vote: userVote})}}},
 			})
 			log.Printf("Add a vote; postId=%s userVote=%s userId=%s", postId, userVote, userId.Hex())
 
@@ -120,7 +120,7 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 			defer cancel()
 
 			_, _ = postCollection.UpdateOne(ctx, bson.M{"_id": postIdPrimitive}, bson.D{
-				{"$set", bson.D{{"votelist", postRecordFetch.VoteList}}},
+				{Key: "$set", Value: bson.D{{Key: "votelist", Value: postRecordFetch.VoteList}}},
 			})
 			log.Printf("Update a vote; postId=%s userVote=%s userId=%s", postId, userVote, userId.Hex())
 
@@ -144,7 +144,7 @@ func GetVote(postId string, userId primitive.ObjectID) (err error, globalVote in
 	var postRecordFetch postRecordFetchT
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	err2 := postCollection.FindOne(ctx, bson.D{{"_id", postIdPrimitive}}).Decode(&postRecordFetch)
+	err2 := postCollection.FindOne(ctx, bson.D{{Key: "_id", Value: postIdPrimitive}}).Decode(&postRecordFetch)
 
 	//fmt.Println(err2, strings.Split(postUrl, "?si=")[0])
 
