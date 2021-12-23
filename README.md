@@ -1,5 +1,9 @@
 # ADZTBotV2
 
+[![Go](https://github.com/DarkOnion0/ADZTBotV2/actions/workflows/go.yml/badge.svg)](https://github.com/DarkOnion0/ADZTBotV2/actions/workflows/go.yml)
+
+[![Container](https://github.com/DarkOnion0/ADZTBotV2/actions/workflows/container.yml/badge.svg)](https://github.com/DarkOnion0/ADZTBotV2/actions/workflows/container.yml)
+
 > A little discord bot with a small footprint and easy to use to share music and video with your friends on your discord server
 
 ADZTBotV2 is the successor of [ADZTBot](https://github.com/DarkOnion0/ADZTBot). It has been rewritten in go to make it
@@ -17,7 +21,7 @@ pretty easy right ?!
 
 ![img.png](Pictures/UsageScreenCapture.png)
 
-## 💽 Installation
+## 💾 Installation
 
 ### 🐹 Go Binary
 
@@ -39,6 +43,40 @@ pretty easy right ?!
 
 3. And that's it
 
-### 🐋 Docker
+### 📦 Container (Docker, Podman...)
 
-> **_✨ Comming soon...✨_**
+#### 1. 💾 Installation
+
+There is 2 way to install `ADZTBotV2` using container
+
+1. **Downloading It,**
+   You can download the prebuilt container with the container manager you want, currently [only 1 platform is supported](#-supported-container-plateform)
+
+   ```sh
+   podman pull ghcr.io/darkonion0/adztbotv2:THE_VERSION_YOU_WANT
+   ```
+
+   > **⚠️ The `latest` tag follow the master branch so it may be unstable or just not-working, USE IT AT YOUR OWNN RISKS⚠️**
+
+2. **Building it,**
+
+   You can build `ADZTBotV2` using any OCI container builder you want that support Dockerfile. The official and currently only supported methods is [Buildah](https://github.com/containers/buildah) but you can also build it with Docker.
+
+   To build `ADZTBotV2` using buildah execute the following command
+
+   ```shell
+    buildah bud -t adztbotv2-local .
+   ```
+
+#### 2. ✨ Running
+
+Execute the following command and replace the env variables value by your own (you can also run the container with docker by the way)
+
+```sh
+podman run -dt -e DB=$db -e URL=$url -e CHANM=$chanm -e CHANV=$chanv -e TOKEN=$token localhost adztbotv2-local:latest
+```
+
+#### 🌉 Supported Container Platform
+
+- `linux/amd64`
+- **_✨ More coming soon...✨_**
