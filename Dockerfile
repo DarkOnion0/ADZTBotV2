@@ -15,7 +15,7 @@ COPY go.sum .
 RUN go get -d -v ./...
 RUN go build -o ADZTBotV2 main.go
 
-FROM alpine:latest
+FROM docker.io/library/alpine:latest
 
 WORKDIR /src/adztbotv2
 
