@@ -50,7 +50,7 @@ pretty easy right ?!
 There is 2 way to install `ADZTBotV2` using container
 
 1. **Downloading It,**
-   You can download the prebuilt container with the container manager you want, currently [only 1 platform is supported](#-supported-container-plateform)
+   You can download the prebuilt container with the container manager you want, currently [only 1 platform is supported](#-supported-container-platform)
 
    ```sh
    podman pull ghcr.io/darkonion0/adztbotv2:THE_VERSION_YOU_WANT
