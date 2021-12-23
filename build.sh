@@ -1,13 +1,56 @@
 #!/usr/bin/env bash
 
-# Cross-Compile golang
-env GOOS=linux GOARCH=amd64 go build -o ./bin/adztbotv2-amd64 ./main.go
-env GOOS=linux GOARCH=arm64 go build -o ./bin/adztbotv2-arm64 ./main.go
+#######################################
+## Global variables and string style ##
+#######################################
+
+bold=$(tput bold)
+
+red="\033[0;31m"
+stop_color='\033[0m'
+
+##########################################
+## Set the execution mode of the script ##
+##########################################
+
+if [ -z $1 ]; then
+	VERSION="latest"
+	echo "Running in manual mode, version=$VERSION"
+else
+	echo "Running in release mode, version=$1"
+	VERSION="$1"
+fi
+
+###############################################
+## Cross-compile ADZTBotV2 && ZIP the output ##
+###############################################
 
 cd ./bin/
 
-sha256sum adztbotv2-amd64 > adztbotv2-amd64_sha256sum.txt
-sha256sum adztbotv2-arm64 > adztbotv2-arm64_sha256sum.txt
+for os in linux windows darwin
+do
+	# Linux is seperated from the other os due to the fact that it support more architechture
+	if [ $os == linux ]; then
+		echo -e "\n$red${bold}Building linux binary...${bold}$stop_color"
+		echo -e "$red${bold}===========================${bold}$stop_color"
 
-zip adztbotv2-amd64 adztbotv2-amd64 adztbotv2-amd64_sha256sum.txt
-zip adztbotv2-arm64 adztbotv2-arm64 adztbotv2-arm64_sha256sum.txt
+		for arch in amd64 386 arm64 arm
+		do
+			echo "${bold}$os/$arch...${bold}"
+			env GOOS=$os GOARCH=$arch go.exe build -o adztbotv2_$os-$arch-$VERSION ./../main.go
+			sha256sum adztbotv2_$os-$arch-$VERSION > adztbotv2_$os-$arch-$VERSION-sha256sum.txt
+			zip adztbotv2_$os-$arch-$VERSION adztbotv2_$os-$arch-$VERSION adztbotv2_$os-$arch-$VERSION-sha256sum.txt
+		done
+	else
+		echo -e "\n$red${bold}Building $os binary...${bold}$stop_color"
+		echo -e "$red${bold}===========================${bold}$stop_color"
+		
+		for arch in amd64 386
+		do 
+			echo "${bold}$os/$arch...${bold}"
+			env GOOS=$os GOARCH=$arch go.exe build -o adztbotv2_$os-$arch-$VERSION ./../main.go
+			sha256sum adztbotv2_$os-$arch-$VERSION > adztbotv2_$os-$arch-$VERSION-sha256sum.txt
+			zip adztbotv2_$os-$arch-$VERSION adztbotv2_$os-$arch-$VERSION adztbotv2_$os-$arch-$VERSION-sha256sum.txt
+		done
+	fi
+done
