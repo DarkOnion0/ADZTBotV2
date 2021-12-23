@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"ADZTBotV2/config"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -28,7 +29,8 @@ func CheckUser(userId string) (bool, primitive.ObjectID) {
 	userInfoCollection := config.Client.Database(*config.DBName).Collection("userInfo")
 
 	var userList userRecordFetch
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	_ = userInfoCollection.FindOne(ctx, bson.D{{"userid", userId}}).Decode(&userList)
 
 	//fmt.Println(userList.Userid, userId)
@@ -48,7 +50,8 @@ func RegisterUser(userId string) {
 	if !userStatus {
 		userInfoCollection := config.Client.Database(*config.DBName).Collection("userInfo")
 
-		ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
 
 		info, _ := userInfoCollection.InsertOne(ctx, userRecordSend{Userid: userId})
 		fmt.Println(info, userId)
@@ -60,7 +63,8 @@ func GetUser(userDbId primitive.ObjectID) (err error, userId string) {
 	userInfoCollection := config.Client.Database(*config.DBName).Collection("userInfo")
 
 	var userList userRecordFetch
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	err1 := userInfoCollection.FindOne(ctx, bson.D{{"_id", userDbId}}).Decode(&userList)
 
 	//fmt.Println(userList.Userid, userId)

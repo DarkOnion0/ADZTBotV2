@@ -10,6 +10,7 @@ import (
 
 	"ADZTBotV2/commands"
 	"ADZTBotV2/config"
+
 	"github.com/bwmarrin/discordgo"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -41,8 +42,12 @@ func main() {
 
 	var errMongo error
 	config.Client, errMongo = mongo.NewClient(options.Client().ApplyURI(*config.DBUrl))
+	if errMongo != nil {
+		log.Fatal(errMongo)
+	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
 	errMongo = config.Client.Connect(ctx)
 	if errMongo != nil {
@@ -56,7 +61,12 @@ func main() {
 
 	log.Println("DB is connected !")
 
-	defer config.Client.Disconnect(ctx)
+	defer func (c *mongo.Client) {
+		err := c.Disconnect(ctx)
+		if err != nil {
+			log.Fatalf("An error occured whle closing the bot: %s", err)
+		}
+	}(config.Client)
 
 	/*
 		Discordgo initialisation
@@ -84,7 +94,7 @@ func main() {
 		}
 	}(s)
 
-	stop := make(chan os.Signal)
+	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
 	<-stop
 	log.Println("Gracefully shutting down...")

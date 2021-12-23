@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"ADZTBotV2/config"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -43,7 +44,8 @@ func Post(userDbId primitive.ObjectID, postType, postUrl string) (bool, string) 
 	postCollection := config.Client.Database(*config.DBName).Collection("post")
 
 	var postRecordFetch postRecordFetchT
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	err1 := postCollection.FindOne(ctx, bson.D{{"url", strings.Split(postUrl, "?si=")[0]}}).Decode(&postRecordFetch)
 
 	//fmt.Println(err1, strings.Split(postUrl, "?si=")[0])
@@ -51,7 +53,8 @@ func Post(userDbId primitive.ObjectID, postType, postUrl string) (bool, string) 
 	if err1 != nil {
 		if err1 == mongo.ErrNoDocuments {
 			// add new post to the db
-			ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
 
 			info, _ := postCollection.InsertOne(ctx, postRecordSendT{Type: postType, Url: strings.Split(postUrl, "?si=")[0], User: userDbId, VoteList: []postVote{{User: userDbId, Vote: "+"}}})
 			log.Printf("A new user post has been added to the database; userDbId=%s url=%s type=%s dbId=%s", userDbId, postUrl, postType, info.InsertedID.(primitive.ObjectID).Hex())
@@ -79,7 +82,8 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 	}
 
 	var postRecordFetch postRecordFetchT
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	err2 := postCollection.FindOne(ctx, bson.D{{"_id", postIdPrimitive}}).Decode(&postRecordFetch)
 
 	//fmt.Println(err2, strings.Split(postUrl, "?si=")[0])
@@ -102,7 +106,8 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 
 		if !alreadyVote {
 			// add new post to the db
-			ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
 
 			_, _ = postCollection.UpdateOne(ctx, bson.M{"_id": postIdPrimitive}, bson.D{
 				{"$set", bson.D{{"votelist", append(postRecordFetch.VoteList, postVote{User: userId, Vote: userVote})}}},
@@ -111,7 +116,8 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 
 			return nil, true
 		} else {
-			ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
 
 			_, _ = postCollection.UpdateOne(ctx, bson.M{"_id": postIdPrimitive}, bson.D{
 				{"$set", bson.D{{"votelist", postRecordFetch.VoteList}}},
@@ -136,7 +142,8 @@ func GetVote(postId string, userId primitive.ObjectID) (err error, globalVote in
 	}
 
 	var postRecordFetch postRecordFetchT
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	err2 := postCollection.FindOne(ctx, bson.D{{"_id", postIdPrimitive}}).Decode(&postRecordFetch)
 
 	//fmt.Println(err2, strings.Split(postUrl, "?si=")[0])
