@@ -1,0 +1,67 @@
+name: Container
+
+on:
+  release:
+    types: [published]
+
+  push:
+    branches: [main]
+
+env:
+  IMAGE_NAME: adztbotv2
+  CONTAINER_REGISTRY: ghcr.io
+
+jobs:
+  Buildah:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install QEMU for cross-compilation
+        run: sudo apt install qemu qemu-user-static
+
+      - name: Log in to registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | buildah login -u ${{ github.actor }} --password-stdin ${{ env.CONTAINER_REGISTRY }}
+
+      - name: Build image for linux
+        run: |
+          buildah bud --platform="linux/amd64" -t ${{ env.IMAGE_NAME }} .
+          buildah bud --platform="linux/386" -t ${{ env.IMAGE_NAME }} .
+          buildah bud --platform="linux/arm64" -t ${{ env.IMAGE_NAME }} .
+          buildah bud --platform="linux/arm" -t ${{ env.IMAGE_NAME }} .
+
+      - name: Build image for Windows
+        run: |
+          buildah bud --platform="windows/amd64" -t ${{ env.IMAGE_NAME }} .
+          buildah bud --platform="windows/386" -t ${{ env.IMAGE_NAME }} .
+
+      - name: Build image for Mac
+        run: |
+          buildah bud --platform="darwin/amd64" -t ${{ env.IMAGE_NAME }} .
+          buildah bud --platform="darwin/arm64" -t ${{ env.IMAGE_NAME }} .
+
+      - name: Push image
+        run: |
+          IMAGE_ID=${{ env.CONTAINER_REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
+
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+          # Use `latest` tag convention
+          [ "$VERSION" == "master" ] && VERSION=latest
+
+          buildah tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          buildah push $IMAGE_ID:$VERSION 
+
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
