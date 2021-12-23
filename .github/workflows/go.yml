@@ -51,8 +51,14 @@ jobs:
         uses: golangci/golangci-lint-action@v2
         with:
           version: latest
-          args: --verbose --timeout 5m
+          args: --verbose --timeout 5m --fix
           skip-go-installation: true
+
+      - name: Commit linted code
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: lint code with golangci-lint, `GithubCI`
+          branch: ${{ github.head_ref }}
 
   build:
     runs-on: ubuntu-latest
