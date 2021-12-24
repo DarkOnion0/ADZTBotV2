@@ -78,8 +78,6 @@ jobs:
           registry: ${{ env.FORMATED_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          extra-args: |
-            --disable-content-trust
 
       - name: Show the push action output
         run: |
