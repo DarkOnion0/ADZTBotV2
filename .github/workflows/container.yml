@@ -22,26 +22,11 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Install QEMU for cross-compilation
-        run: sudo apt install qemu qemu-user-static
-
-      - name: Log in to registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | buildah login -u ${{ github.actor }} --password-stdin ${{ env.CONTAINER_REGISTRY }}
-
-      - name: Build image
-        run: |
-          buildah bud --platform="linux/amd64" -t ${{ env.IMAGE_NAME }} .
-
-      # - name: Build image for Windows
-      #   run: |
-      #     buildah bud --platform="windows/amd64" -t ${{ env.IMAGE_NAME }} .
-      #     buildah bud --platform="windows/386" -t ${{ env.IMAGE_NAME }} .
-
-      # - name: Build image for Mac
-      #   run: |
-      #     buildah bud --platform="darwin/amd64" -t ${{ env.IMAGE_NAME }} .
-      #     buildah bud --platform="darwin/arm64" -t ${{ env.IMAGE_NAME }} .
-
-      - name: Push image
+        run: | 
+          sudo apt update
+          sudo apt install qemu-user-static
+        
+      - name: Format tag and image name
         run: |
           IMAGE_ID=${{ env.CONTAINER_REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
 
@@ -57,8 +42,42 @@ jobs:
           # Use `latest` tag convention
           [ "$VERSION" == "main" ] && VERSION=latest
 
-          buildah tag $IMAGE_NAME $IMAGE_ID:$VERSION
-          buildah push $IMAGE_ID:$VERSION 
+      - name: Buildah build
+        id: buildah_build
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: ${{ env.IMAGE_ID }}
+          tags: ${{ env.VERSION }}
+          plateform: linux/amd64, linux/arm64, linux/arm, linux/386, windows/amd64, windows/386, darwin/amd64, darwin/386
+          containerfiles: |
+            ./Containerfile
+        
+      - name: Show buildah_build output
+        run: |
+          echo "Image: ${{ steps.buildah_build.outputs.image }}"
+          echo "Tags: ${{ steps.buildah_build.outputs.tags }}"
+          echo "Tagged Image: ${{ steps.buildah_build.outputs.image-with-tag }}"
+          
+      - name: Check images created in the buildah_build step
+        run: buildah images | grep '${{ env.IMAGE_ID }}'
 
-          echo IMAGE_ID=$IMAGE_ID
-          echo VERSION=$VERSION
+      - name: Check manifest created in the buildah_build step
+        run: |
+          set -x
+          buildah manifest inspect ${{ steps.buildah_build.outputs.image }}:${{ env.VERSION }}
+
+      - name: Push To ${{ env.CONTAINER_REGISTRY }}
+        id: push-to-registry
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.buildah_build.outputs.image }}
+          tags: ${{ steps.buildah_build.outputs.tags }}
+          registry: ${{ env.CONTAINER_REGISTRY }}/${{ github.repository_owner }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          extra-args: |
+            --disable-content-trust
+
+      - name: Show the push action output
+        run: |
+          echo "${{ toJSON(steps.push-to-registry.outputs) }}"
