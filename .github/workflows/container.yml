@@ -28,10 +28,10 @@ jobs:
         
       - name: Format tag and image name
         run: |
-          IMAGE_ID=${{ env.CONTAINER_REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
+          FORMATED_REGISTRY=${{ env.CONTAINER_REGISTRY }}/${{ github.repository_owner }}
 
           # Change all uppercase to lowercase and add it to github env
-          echo "IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')" >> $GITHUB_ENV
+          echo "FORMATED_REGISTRY=$(echo $FORMATED_REGISTRY | tr '[A-Z]' '[a-z]')" >> $GITHUB_ENV
 
           # Strip git ref prefix from version
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
@@ -48,7 +48,7 @@ jobs:
         id: buildah_build
         uses: redhat-actions/buildah-build@v2
         with:
-          image: ${{ env.IMAGE_ID }}
+          image: ${{ env.IMAGE_NAME }}
           tags: ${{ env.VERSION }}
           #platforms: linux/amd64, linux/arm64, linux/arm, linux/386, windows/amd64, windows/386, darwin/amd64, darwin/386
           platforms: linux/amd64, linux/arm64, linux/arm, linux/386
@@ -62,7 +62,7 @@ jobs:
           echo "Tagged Image: ${{ steps.buildah_build.outputs.image-with-tag }}"
           
       - name: Check images created in the buildah_build step
-        run: buildah images | grep '${{ env.IMAGE_ID }}'
+        run: buildah images | grep '${{ env.IMAGE_NAME }}'
 
       - name: Check manifest created in the buildah_build step
         run: |
@@ -75,7 +75,7 @@ jobs:
         with:
           image: ${{ steps.buildah_build.outputs.image }}
           tags: ${{ steps.buildah_build.outputs.tags }}
-          #registry: ${{ env.CONTAINER_REGISTRY }}/${{ github.repository_owner }}
+          registry: ${{ env.FORMATED_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           extra-args: |
