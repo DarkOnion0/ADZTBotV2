@@ -30,8 +30,8 @@ jobs:
         run: |
           IMAGE_ID=${{ env.CONTAINER_REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
 
-          # Change all uppercase to lowercase
-          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          # Change all uppercase to lowercase and add it to github env
+          echo "IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')" >> $GITHUB_ENV
 
           # Strip git ref prefix from version
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
@@ -39,8 +39,10 @@ jobs:
           # Strip "v" prefix from tag name
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
 
-          # Use `latest` tag convention
+          # Use `latest` tag convention and add it to github env
           [ "$VERSION" == "main" ] && VERSION=latest
+          
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Buildah build
         id: buildah_build
@@ -48,7 +50,7 @@ jobs:
         with:
           image: ${{ env.IMAGE_ID }}
           tags: ${{ env.VERSION }}
-          plateform: linux/amd64, linux/arm64, linux/arm, linux/386, windows/amd64, windows/386, darwin/amd64, darwin/386
+          platforms: linux/amd64, linux/arm64, linux/arm, linux/386, windows/amd64, windows/386, darwin/amd64, darwin/386
           containerfiles: |
             ./Containerfile
         
