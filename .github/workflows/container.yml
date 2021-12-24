@@ -75,7 +75,7 @@ jobs:
         with:
           image: ${{ steps.buildah_build.outputs.image }}
           tags: ${{ steps.buildah_build.outputs.tags }}
-          registry: ${{ env.CONTAINER_REGISTRY }}/${{ github.repository_owner }}
+          #registry: ${{ env.CONTAINER_REGISTRY }}/${{ github.repository_owner }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           extra-args: |
