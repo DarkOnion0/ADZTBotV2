@@ -52,7 +52,7 @@ jobs:
           tags: ${{ env.VERSION }}
           platforms: linux/amd64, linux/arm64, linux/arm, linux/386, windows/amd64, windows/386, darwin/amd64, darwin/386
           containerfiles: |
-            ./Containerfile
+            ./Dockerfile
         
       - name: Show buildah_build output
         run: |
