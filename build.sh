@@ -37,7 +37,7 @@ do
 		for arch in amd64 386 arm64 arm
 		do
 			echo "${bold}$os/$arch...${bold}"
-			env GOOS=$os GOARCH=$arch go.exe build -o adztbotv2_$os-$arch-$VERSION ./../main.go
+			env GOOS=$os GOARCH=$arch go build -o adztbotv2_$os-$arch-$VERSION ./../main.go
 			sha256sum adztbotv2_$os-$arch-$VERSION > adztbotv2_$os-$arch-$VERSION-sha256sum.txt
 			zip adztbotv2_$os-$arch-$VERSION adztbotv2_$os-$arch-$VERSION adztbotv2_$os-$arch-$VERSION-sha256sum.txt
 		done
@@ -48,7 +48,7 @@ do
 		for arch in amd64 386
 		do 
 			echo "${bold}$os/$arch...${bold}"
-			env GOOS=$os GOARCH=$arch go.exe build -o adztbotv2_$os-$arch-$VERSION ./../main.go
+			env GOOS=$os GOARCH=$arch go build -o adztbotv2_$os-$arch-$VERSION ./../main.go
 			sha256sum adztbotv2_$os-$arch-$VERSION > adztbotv2_$os-$arch-$VERSION-sha256sum.txt
 			zip adztbotv2_$os-$arch-$VERSION adztbotv2_$os-$arch-$VERSION adztbotv2_$os-$arch-$VERSION-sha256sum.txt
 		done
