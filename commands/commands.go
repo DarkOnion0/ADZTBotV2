@@ -5,10 +5,10 @@ import (
 	"log"
 	"strconv"
 
-	"ADZTBotV2/config"
+	"github.com/DarkOnion0/ADZTBotV2/config"
 	"github.com/bwmarrin/discordgo"
 
-	"ADZTBotV2/db"
+	"github.com/DarkOnion0/ADZTBotV2/db"
 )
 
 var (

@@ -7,7 +7,7 @@ import (
 	"log"
 	"time"
 
-	"ADZTBotV2/config"
+	"github.com/DarkOnion0/ADZTBotV2/config"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

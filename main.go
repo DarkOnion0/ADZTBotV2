@@ -8,8 +8,8 @@ import (
 	"os/signal"
 	"time"
 
-	"ADZTBotV2/commands"
-	"ADZTBotV2/config"
+	"github.com/DarkOnion0/ADZTBotV2/commands"
+	"github.com/DarkOnion0/ADZTBotV2/config"
 
 	"github.com/bwmarrin/discordgo"
 	"go.mongodb.org/mongo-driver/mongo"

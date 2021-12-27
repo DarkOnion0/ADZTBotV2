@@ -1,4 +1,4 @@
-module ADZTBotV2
+module github.com/DarkOnion0/ADZTBotV2
 
 go 1.16
 
