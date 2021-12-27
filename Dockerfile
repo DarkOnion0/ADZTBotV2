@@ -2,14 +2,8 @@ FROM docker.io/library/golang:1.16 as builder
 
 WORKDIR /src/adztbotv2
 
-# Project file
-COPY main.go .
-COPY db/ ./db/
-COPY config/ ./config/
-COPY commands/ ./commands/
-# Go settings
-COPY go.mod .
-COPY go.sum .
+# Copy project file
+COPY . .
 
 # Donwload and Install project
 RUN go get -d -v ./...
