@@ -41,7 +41,6 @@ pretty easy right ?!
 
 3. And that's it
 
-<!--
 ### 📦 Container (Docker, Podman...)
 
 #### 1. 💾 Installation
@@ -49,7 +48,9 @@ pretty easy right ?!
 There is 2 way to install `ADZTBotV2` using container
 
 1. **Downloading It,**
-   You can download the prebuilt container with the container manager you want, currently [only linux container are built](#-supported-container-platform), for more information see [the package page](https://github.com/DarkOnion0/ADZTBotV2/pkgs/container/adztbotv2)
+   You can download the prebuilt container with the container manager you want,
+   currently [only linux container are built](#-supported-container-platform), for more information
+   see [the package page](https://github.com/DarkOnion0/ADZTBotV2/pkgs/container/adztbotv2)
 
    ```sh
    podman pull ghcr.io/darkonion0/adztbotv2:THE_VERSION_YOU_WANT
@@ -59,7 +60,9 @@ There is 2 way to install `ADZTBotV2` using container
 
 2. **Building it,**
 
-   You can build `ADZTBotV2` using any OCI container builder you want that support Dockerfile. The official and currently only supported methods is [Buildah](https://github.com/containers/buildah) but you can also build it with Docker.
+   You can build `ADZTBotV2` using any OCI container builder you want that support Dockerfile. The official and
+   currently only supported methods is [Buildah](https://github.com/containers/buildah) but you can also build it with
+   Docker.
 
    To build `ADZTBotV2` using buildah execute the following command
 
@@ -69,7 +72,8 @@ There is 2 way to install `ADZTBotV2` using container
 
 #### 2. ✨ Running
 
-Execute the following command and replace the env variables value by your own (you can also run the container with docker by the way)
+Execute the following command and replace the env variables value by your own (you can also run the container with
+docker by the way)
 
 ```sh
 podman run -dt -e DB=$db -e URL=$url -e CHANM=$chanm -e CHANV=$chanv -e TOKEN=$token localhost adztbotv2-local:latest
@@ -82,4 +86,3 @@ podman run -dt -e DB=$db -e URL=$url -e CHANM=$chanm -e CHANV=$chanv -e TOKEN=$t
 - `linux/arm64`
 - `linux/arm`
 - **_✨ More coming soon...✨_**
--->
