@@ -82,7 +82,6 @@ podman run -dt -e DB=$db -e URL=$url -e CHANM=$chanm -e CHANV=$chanv -e TOKEN=$t
 #### 🌉 Supported Container Platform
 
 - `linux/amd64`
-- `linux/386`
 - `linux/arm64`
 - `linux/arm`
 - **_✨ More coming soon...✨_**
