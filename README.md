@@ -41,6 +41,7 @@ pretty easy right ?!
 
 3. And that's it
 
+<!--
 ### 📦 Container (Docker, Podman...)
 
 #### 1. 💾 Installation
@@ -81,3 +82,4 @@ podman run -dt -e DB=$db -e URL=$url -e CHANM=$chanm -e CHANV=$chanv -e TOKEN=$t
 - `linux/arm64`
 - `linux/arm`
 - **_✨ More coming soon...✨_**
+-->
