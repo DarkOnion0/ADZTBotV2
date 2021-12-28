@@ -42,15 +42,15 @@ do
 			sha256sum adztbotv2_$os-$arch-$VERSION > adztbotv2_$os-$arch-$VERSION-sha256sum.txt
 			zip adztbotv2_$os-$arch-$VERSION adztbotv2_$os-$arch-$VERSION adztbotv2_$os-$arch-$VERSION-sha256sum.txt
 		done
-  elif [ $os == darwin ]; then
-    echo -e "\n$red${bold}Building $os binary...${bold}$stop_color"
-    echo -e "$red${bold}===========================${bold}$stop_color"
+	elif [ $os == darwin ]; then
+		echo -e "\n$red${bold}Building $os binary...${bold}$stop_color"
+		echo -e "$red${bold}===========================${bold}$stop_color"
 
-    arch=amd64
-    echo "${bold}$os/$arch...${bold}"
-    env GOOS=$os GOARCH=$arch go build -o adztbotv2_$os-$arch-$VERSION ./../main.go
-    sha256sum adztbotv2_$os-$arch-$VERSION > adztbotv2_$os-$arch-$VERSION-sha256sum.txt
-    zip adztbotv2_$os-$arch-$VERSION adztbotv2_$os-$arch-$VERSION adztbotv2_$os-$arch-$VERSION-sha256sum.txt
+		arch=amd64
+		echo "${bold}$os/$arch...${bold}"
+		env GOOS=$os GOARCH=$arch go build -o adztbotv2_$os-$arch-$VERSION ./../main.go
+		sha256sum adztbotv2_$os-$arch-$VERSION > adztbotv2_$os-$arch-$VERSION-sha256sum.txt
+		zip adztbotv2_$os-$arch-$VERSION adztbotv2_$os-$arch-$VERSION adztbotv2_$os-$arch-$VERSION-sha256sum.txt
 	else
 		echo -e "\n$red${bold}Building $os binary...${bold}$stop_color"
 		echo -e "$red${bold}===========================${bold}$stop_color"
