@@ -7,16 +7,16 @@ COPY . .
 
 # Donwload and Install project
 RUN go get -d -v ./...
-RUN go build -o ADZTBotV2 main.go
+RUN env CGO_ENABLED=0 go build -o ADZTBotV2 main.go
 
-FROM docker.io/library/ubuntu:20.04
+FROM docker.io/library/alpine:latest
 
 WORKDIR /src/adztbotv2
 
 COPY --from=builder /src/adztbotv2/ADZTBotV2 /src/adztbotv2/
 
-RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
-RUN update-ca-certificates
+#RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+#RUN update-ca-certificates
 
 # Env variables
 ENV DB none
