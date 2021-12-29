@@ -2,10 +2,10 @@ name: Container
 
 on:
   release:
-    types: [published]
+    types: [ published ]
 
   push:
-    branches: [main]
+    branches: [ main ]
 
 env:
   IMAGE_NAME: adztbotv2
@@ -21,11 +21,15 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Install QEMU for cross-compilation
-        run: | 
+      - name: Install prerequisites
+        run: |
           sudo apt update
-          sudo apt install qemu-user-static
-        
+          sudo apt install qemu-user-static jq skopeo
+
+      - name: Get the actual latest image digest
+        run: |
+          echo "OLD_LATEST_DIGEST=$(skopeo inspect docker://ghcr.io/darkonion0/adztbotv2:latest | jq .Digest) >> $GITHUB_ENV
+
       - name: Format tag and image name
         run: |
           FORMATED_REGISTRY=${{ env.CONTAINER_REGISTRY }}/${{ github.repository_owner }}
@@ -54,13 +58,13 @@ jobs:
           platforms: linux/amd64, linux/arm64, linux/arm, linux/386
           containerfiles: |
             ./Dockerfile
-        
+
       - name: Show buildah_build output
         run: |
           echo "Image: ${{ steps.buildah_build.outputs.image }}"
           echo "Tags: ${{ steps.buildah_build.outputs.tags }}"
           echo "Tagged Image: ${{ steps.buildah_build.outputs.image-with-tag }}"
-          
+
       - name: Check images created in the buildah_build step
         run: buildah images | grep '${{ env.IMAGE_NAME }}'
 
@@ -82,3 +86,31 @@ jobs:
       - name: Show the push action output
         run: |
           echo "${{ toJSON(steps.push-to-registry.outputs) }}"
+
+
+  delete-old-latest:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install prerequisites
+        run: |
+          sudo apt update
+          sudo apt install skopeo jq
+
+      - name: Format user name
+        run: |
+          USER=${{ github.repository_owner }}
+
+          # Change all uppercase to lowercase and add it to github env
+          echo "USER=$(echo $USER | tr '[A-Z]' '[a-z]')" >> $GITHUB_ENV
+
+      - name: Login to regitry
+        run: echo ${{ secrets.GITHUB_TOKEN }} | skopeo login -u ${{ env.USER }} --password-stdin ${{ env.CONTAINER_REGISTRY }}
+
+      - name: Delete old latest image
+        run: skopeo delete docker://${{ env.FORMATED_REGISTRY }}/${{ env.IMAGE_NAME }}@${{ env.OLD_LATEST_DIGEST }}
