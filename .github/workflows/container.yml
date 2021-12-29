@@ -12,7 +12,7 @@ env:
   CONTAINER_REGISTRY: ghcr.io
 
 jobs:
-  build-and-push:
+  Container:
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -48,6 +48,14 @@ jobs:
           
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
+      - name: Format user name
+        if: env.VERSION == 'latest'
+        run: |
+          USER=${{ github.repository_owner }}
+
+          # Change all uppercase to lowercase and add it to github env
+          echo "USER=$(echo $USER | tr '[A-Z]' '[a-z]')" >> $GITHUB_ENV
+
       - name: Buildah build
         id: buildah_build
         uses: redhat-actions/buildah-build@v2
@@ -73,7 +81,15 @@ jobs:
           set -x
           buildah manifest inspect ${{ steps.buildah_build.outputs.image }}:${{ env.VERSION }}
 
-      - name: Push To ${{ env.CONTAINER_REGISTRY }}
+      - name: Authenticate to ${{ env.CONTAINER_REGISTRY }} with skopeo
+        if: env.VERSION == 'latest'
+        run: echo ${{ secrets.GITHUB_TOKEN }} | skopeo login -u ${{ env.USER }} --password-stdin ${{ env.CONTAINER_REGISTRY }}
+
+      - name: Delete old latest image
+        if: env.VERSION == 'latest'
+        run: skopeo delete docker://${{ env.FORMATED_REGISTRY }}/${{ env.IMAGE_NAME }}@${{ env.OLD_LATEST_DIGEST }}
+
+      - name: Push to ${{ env.CONTAINER_REGISTRY }}
         id: push-to-registry
         uses: redhat-actions/push-to-registry@v2
         with:
@@ -86,40 +102,3 @@ jobs:
       - name: Show the push action output
         run: |
           echo "${{ toJSON(steps.push-to-registry.outputs) }}"
-
-
-  delete-old-latest:
-    runs-on: ubuntu-latest
-    needs: build-and-push
-    permissions:
-      packages: write
-      contents: read
-
-    steps:
-      - name: Diplay env variable
-        run: echo $VERSION
-
-      - uses: actions/checkout@v2
-        if: env.VERSION == 'latest'
-
-      - name: Install prerequisites
-        if: env.VERSION == 'latest'
-        run: |
-          sudo apt update
-          sudo apt install skopeo jq
-
-      - name: Format user name
-        if: env.VERSION == 'latest'
-        run: |
-          USER=${{ github.repository_owner }}
-
-          # Change all uppercase to lowercase and add it to github env
-          echo "USER=$(echo $USER | tr '[A-Z]' '[a-z]')" >> $GITHUB_ENV
-
-      - name: Login to regitry
-        if: env.VERSION == 'latest'
-        run: echo ${{ secrets.GITHUB_TOKEN }} | skopeo login -u ${{ env.USER }} --password-stdin ${{ env.CONTAINER_REGISTRY }}
-
-      - name: Delete old latest image
-        if: env.VERSION == 'latest'
-        run: skopeo delete docker://${{ env.FORMATED_REGISTRY }}/${{ env.IMAGE_NAME }}@${{ env.OLD_LATEST_DIGEST }}
