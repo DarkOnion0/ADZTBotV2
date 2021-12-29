@@ -97,17 +97,17 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-        if: env.VERSION == "latest"
+        if: env.VERSION == 'latest'
 
 
       - name: Install prerequisites
-        if: env.VERSION == "latest"
+        if: env.VERSION == 'latest'
         run: |
           sudo apt update
           sudo apt install skopeo jq
 
       - name: Format user name
-        if: env.VERSION == "latest"
+        if: env.VERSION == 'latest'
         run: |
           USER=${{ github.repository_owner }}
 
@@ -115,9 +115,9 @@ jobs:
           echo "USER=$(echo $USER | tr '[A-Z]' '[a-z]')" >> $GITHUB_ENV
 
       - name: Login to regitry
-        if: env.VERSION == "latest"
+        if: env.VERSION == 'latest'
         run: echo ${{ secrets.GITHUB_TOKEN }} | skopeo login -u ${{ env.USER }} --password-stdin ${{ env.CONTAINER_REGISTRY }}
 
       - name: Delete old latest image
-        if: env.VERSION == "latest"
+        if: env.VERSION == 'latest'
         run: skopeo delete docker://${{ env.FORMATED_REGISTRY }}/${{ env.IMAGE_NAME }}@${{ env.OLD_LATEST_DIGEST }}
