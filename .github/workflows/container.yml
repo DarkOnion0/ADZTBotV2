@@ -28,7 +28,7 @@ jobs:
 
       - name: Get the actual latest image digest
         run: |
-          echo "OLD_LATEST_DIGEST=$(skopeo inspect docker://ghcr.io/darkonion0/adztbotv2:latest | jq .Digest) >> $GITHUB_ENV
+          echo "OLD_LATEST_DIGEST=$(skopeo inspect docker://ghcr.io/darkonion0/adztbotv2:latest | jq .Digest | tr -d \") >> $GITHUB_ENV
 
       - name: Format tag and image name
         run: |
