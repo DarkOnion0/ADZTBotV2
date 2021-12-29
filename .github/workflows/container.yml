@@ -97,7 +97,7 @@ jobs:
 
     steps:
       - name: Diplay env variable
-        run: ${{ env.VERSION }}
+        run: echo $VERSION
 
       - uses: actions/checkout@v2
         if: env.VERSION == 'latest'
