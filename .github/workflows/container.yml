@@ -96,9 +96,11 @@ jobs:
       contents: read
 
     steps:
+      - name: Diplay env variable
+        run: ${{ env.VERSION }}
+
       - uses: actions/checkout@v2
         if: env.VERSION == 'latest'
-
 
       - name: Install prerequisites
         if: env.VERSION == 'latest'
