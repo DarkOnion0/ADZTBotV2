@@ -91,7 +91,7 @@ jobs:
   delete-old-latest:
     runs-on: ubuntu-latest
     needs: build-and-push
-    if: ${{ env.VERSION == "latest" }}
+    if: env.VERSION == "latest"
     permissions:
       packages: write
       contents: read
