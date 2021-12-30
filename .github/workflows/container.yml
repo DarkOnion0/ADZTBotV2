@@ -85,9 +85,9 @@ jobs:
       #  if: env.VERSION == 'latest'
       #  run: echo ${{ secrets.GITHUB_TOKEN }} | skopeo login -u ${{ env.USER }} --password-stdin ${{ env.CONTAINER_REGISTRY }}
 
-      - name: Delete old latest image
-        if: env.VERSION == 'latest'
-        run: skopeo delete --creds=${{ env.USER }}:${{ secrets.GITHUB_TOKEN }} docker://${{ env.FORMATED_REGISTRY }}/${{ env.IMAGE_NAME }}@${{ env.OLD_LATEST_DIGEST }}
+      #- name: Delete old latest image
+      #  if: env.VERSION == 'latest'
+      #  run: skopeo delete --creds=${{ env.USER }}:${{ secrets.GITHUB_TOKEN }} docker://${{ env.FORMATED_REGISTRY }}/${{ env.IMAGE_NAME }}@${{ env.OLD_LATEST_DIGEST }}
 
       - name: Push to ${{ env.CONTAINER_REGISTRY }}
         id: push-to-registry
