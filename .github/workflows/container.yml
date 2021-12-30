@@ -24,11 +24,11 @@ jobs:
       - name: Install prerequisites
         run: |
           sudo apt update
-          sudo apt install qemu-user-static jq skopeo
+          sudo apt install qemu-user-static
 
-      - name: Get the actual latest image digest
-        run: |
-          echo "OLD_LATEST_DIGEST=$(skopeo inspect docker://ghcr.io/darkonion0/adztbotv2:latest | jq .Digest | tr -d \")" >> $GITHUB_ENV
+      #- name: Get the actual latest image digest
+      #  run: |
+      #    echo "OLD_LATEST_DIGEST=$(skopeo inspect docker://ghcr.io/darkonion0/adztbotv2:latest | jq .Digest | tr -d \")" >> $GITHUB_ENV
 
       - name: Format tag and image name
         run: |
@@ -48,13 +48,13 @@ jobs:
           
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Format user name
-        if: env.VERSION == 'latest'
-        run: |
-          USER=${{ github.repository_owner }}
+      #- name: Format user name
+      #  if: env.VERSION == 'latest'
+      #  run: |
+      #    USER=${{ github.repository_owner }}
 
-          # Change all uppercase to lowercase and add it to github env
-          echo "USER=$(echo $USER | tr '[A-Z]' '[a-z]')" >> $GITHUB_ENV
+      #    # Change all uppercase to lowercase and add it to github env
+      #    echo "USER=$(echo $USER | tr '[A-Z]' '[a-z]')" >> $GITHUB_ENV
 
       - name: Buildah build
         id: buildah_build
