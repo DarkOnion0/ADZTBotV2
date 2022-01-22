@@ -27,7 +27,7 @@ type userRecordSend struct {
 
 type UserInfoFetch struct {
 	ID          primitive.ObjectID `bson:"_id" json:"id,omitempty"`
-	Posts       []postRecordFetchT
+	Posts       []PostRecordFetchT
 	GlobalScore int
 }
 
