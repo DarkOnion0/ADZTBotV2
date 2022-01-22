@@ -22,7 +22,7 @@ type postRecordSendT struct {
 	VoteList []postVote
 }
 
-type postRecordFetchT struct {
+type PostRecordFetchT struct {
 	ID       primitive.ObjectID `bson:"_id" json:"id,omitempty"`
 	Type     string
 	Url      string
@@ -43,7 +43,7 @@ type postVote struct {
 func Post(userDbId primitive.ObjectID, postType, postUrl string) (bool, string) {
 	postCollection := config.Client.Database(*config.DBName).Collection("post")
 
-	var postRecordFetch postRecordFetchT
+	var postRecordFetch PostRecordFetchT
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	err1 := postCollection.FindOne(ctx, bson.D{{Key: "url", Value: strings.Split(postUrl, "?si=")[0]}}).Decode(&postRecordFetch)
@@ -81,7 +81,7 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 		log.Fatalf("An error occured while convertign the post hex ObjectID to the primitve.ObjectID")
 	}
 
-	var postRecordFetch postRecordFetchT
+	var postRecordFetch PostRecordFetchT
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	err2 := postCollection.FindOne(ctx, bson.D{{Key: "_id", Value: postIdPrimitive}}).Decode(&postRecordFetch)
@@ -131,9 +131,8 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 	return errors.New("the function shouldn't arrive there"), false
 }
 
-func GetVote(postId string, userId primitive.ObjectID) (err error, globalVote int, userVote string, postFetch postRecordFetchT) {
-	userVote = "You haven't yet vote on this post 😅"
-	globalVote = 0
+// GetVote function fetch and return all the information about a post according to the provided postId and userId
+func GetVote(postId string, userId primitive.ObjectID) (err error, globalVote int, userVote string, postFetch PostRecordFetchT) {
 	postCollection := config.Client.Database(*config.DBName).Collection("post")
 	postIdPrimitive, err1 := primitive.ObjectIDFromHex(postId)
 
@@ -141,42 +140,51 @@ func GetVote(postId string, userId primitive.ObjectID) (err error, globalVote in
 		log.Fatalf("An error occured while convertign the post hex ObjectID to the primitve.ObjectID")
 	}
 
-	var postRecordFetch postRecordFetchT
+	// make a mongodb request to get the post information according to the provided postId
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	err2 := postCollection.FindOne(ctx, bson.D{{Key: "_id", Value: postIdPrimitive}}).Decode(&postRecordFetch)
+	err2 := postCollection.FindOne(ctx, bson.D{{Key: "_id", Value: postIdPrimitive}}).Decode(&postFetch)
 
 	//fmt.Println(err2, strings.Split(postUrl, "?si=")[0])
 
 	if err2 != nil {
 		if err2 == mongo.ErrNoDocuments {
-			return errors.New("the postID is not valid"), globalVote, userVote, postRecordFetchT{}
+			return errors.New("the postID is not valid"), globalVote, userVote, PostRecordFetchT{}
 		}
 		log.Fatalf("An error occured while fetching the post: %s", err2)
 		//return errors.New("An error occurred while fetching the post"), false
 	} else {
 		err = nil
+		// count the vote score of the post
+		globalVote, userVote = countScorePost(postFetch, userId)
 
-		for i := 0; i < len(postRecordFetch.VoteList); i++ {
-			if postRecordFetch.VoteList[i].User == userId {
-				if postRecordFetch.VoteList[i].Vote == "+" {
-					userVote = "Like 👍"
-					globalVote += 1
-				} else {
-					userVote = "Dislike 👎"
-					globalVote += -1
-				}
-			} else {
-				if postRecordFetch.VoteList[i].Vote == "+" {
-					globalVote += 1
-				} else {
-					globalVote += -1
-				}
-			}
-		}
-
-		return err, globalVote, userVote, postRecordFetch
+		return err, globalVote, userVote, postFetch
 	}
 
-	return errors.New("the function shouldn't arrive there"), globalVote, userVote, postRecordFetchT{}
+	return errors.New("the function shouldn't arrive there"), globalVote, userVote, PostRecordFetchT{}
+}
+
+func countScorePost(postRecord PostRecordFetchT, userId primitive.ObjectID) (globalVote int, userVote string) {
+	userVote = "You haven't yet vote on this post 😅"
+	globalVote = 0
+
+	for i := 0; i < len(postRecord.VoteList); i++ {
+		if postRecord.VoteList[i].User == userId {
+			if postRecord.VoteList[i].Vote == "+" {
+				userVote = "Like 👍"
+				globalVote += 1
+			} else {
+				userVote = "Dislike 👎"
+				globalVote += -1
+			}
+		} else {
+			if postRecord.VoteList[i].Vote == "+" {
+				globalVote += 1
+			} else {
+				globalVote += -1
+			}
+		}
+	}
+
+	return
 }
