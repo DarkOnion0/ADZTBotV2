@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/DarkOnion0/ADZTBotV2/config"
@@ -22,6 +23,12 @@ type userRecordFetch struct {
 type userRecordSend struct {
 	//ID     primitive.ObjectID `bson:"_id" json:"id,omitempty"`
 	Userid string
+}
+
+type UserInfoFetch struct {
+	ID          primitive.ObjectID `bson:"_id" json:"id,omitempty"`
+	Posts       []postRecordFetchT
+	GlobalScore int
 }
 
 // CheckUser function check if a user exists in the database according to his discord id
@@ -59,7 +66,8 @@ func RegisterUser(userId string) {
 	}
 }
 
-func GetUser(userDbId primitive.ObjectID) (err error, userId string) {
+// GetDiscordId function get and return the user discord id according to the provided mongodb _id
+func GetDiscordId(userDbId primitive.ObjectID) (err error, userId string) {
 	userInfoCollection := config.Client.Database(*config.DBName).Collection("userInfo")
 
 	var userList userRecordFetch
@@ -81,4 +89,56 @@ func GetUser(userDbId primitive.ObjectID) (err error, userId string) {
 	}
 
 	return errors.New("the function shouldn't arrive there"), ""
+}
+
+// GetUserInfo function get and return all the user infos according to the provided mongodb _id
+func GetUserInfo(userDbId primitive.ObjectID) (err int, userStats UserInfoFetch) {
+	// TODO update the error handling in this function
+
+	postCollection := config.Client.Database(*config.DBName).Collection("post")
+
+	userStats = UserInfoFetch{ID: userDbId}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	cursor, err1 := postCollection.Find(ctx, bson.D{{Key: "user", Value: userDbId}})
+	defer func(cursor *mongo.Cursor, ctx context.Context) {
+		err := cursor.Close(ctx)
+		if err != nil {
+			log.Fatalf("Something bad append %s", err)
+		}
+	}(cursor, ctx)
+
+	if err1 != nil {
+		if err1 == mongo.ErrNoDocuments {
+			return 1, UserInfoFetch{}
+		}
+		log.Fatalf("An error occured while fetching the userId: %s", err1)
+		//return errors.New("An error occurred while fetching the post"), false
+	}
+
+	log.Printf("%s ", strconv.Itoa(userStats.GlobalScore))
+
+	err2 := cursor.All(ctx, &userStats.Posts)
+	if err2 != nil {
+		log.Fatalf("Something bad append while fetching all the document in mongodb %s", err2)
+
+		return 2, UserInfoFetch{}
+	}
+
+	log.Println(userStats.Posts)
+
+	if len(userStats.Posts) == 0 {
+		return 3, UserInfoFetch{}
+	}
+
+	// iterate over all the fetched document
+	for i := 0; i < len(userStats.Posts); i++ {
+		scorePost, _ := countScorePost(userStats.Posts[i], userDbId)
+		log.Printf("%s", strconv.Itoa(scorePost))
+		userStats.GlobalScore += scorePost
+		log.Printf("%s", strconv.Itoa(userStats.GlobalScore))
+	}
+
+	return err, userStats
 }
