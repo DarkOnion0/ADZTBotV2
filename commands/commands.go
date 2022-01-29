@@ -358,7 +358,23 @@ var (
 
 				} else if statsType == "Mentionable" {
 					log.Println("Running the stats command for a user")
-					_, userDbId := db.CheckUser(i.ApplicationCommandData().Options[0].UserValue(s).ID)
+					userExist, userDbId := db.CheckUser(i.ApplicationCommandData().Options[0].UserValue(s).ID)
+
+					if !userExist {
+						log.Printf("The requested user is not register in the database")
+
+						err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+							Type: discordgo.InteractionResponseChannelMessageWithSource,
+							Data: &discordgo.InteractionResponseData{
+								Content: "The requested user is not register in the database 😞",
+							},
+						})
+
+						if err != nil {
+							log.Fatalf("An error occured while sending back the checkuser error message to discord: %s", err)
+						}
+						return
+					}
 
 					err1, userStats := db.GetUserInfo(userDbId)
 
