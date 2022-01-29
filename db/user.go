@@ -95,10 +95,13 @@ func GetDiscordId(userDbId primitive.ObjectID) (err error, userId string) {
 func GetUserInfo(userDbId primitive.ObjectID) (err int, userStats UserInfoFetch) {
 	// TODO update the error handling in this function
 
+	// init the mongodb collection
 	postCollection := config.Client.Database(*config.DBName).Collection("post")
 
+	// Init the users stats var
 	userStats = UserInfoFetch{ID: userDbId}
 
+	// Query DB
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	cursor, err1 := postCollection.Find(ctx, bson.D{{Key: "user", Value: userDbId}})
@@ -119,6 +122,7 @@ func GetUserInfo(userDbId primitive.ObjectID) (err int, userStats UserInfoFetch)
 
 	log.Printf("%s ", strconv.Itoa(userStats.GlobalScore))
 
+	// Get all the posts in just one array
 	err2 := cursor.All(ctx, &userStats.Posts)
 	if err2 != nil {
 		log.Fatalf("Something bad append while fetching all the document in mongodb %s", err2)
@@ -128,6 +132,7 @@ func GetUserInfo(userDbId primitive.ObjectID) (err int, userStats UserInfoFetch)
 
 	log.Println(userStats.Posts)
 
+	// Return an error of type 3 if a user as posted anything
 	if len(userStats.Posts) == 0 {
 		return 3, UserInfoFetch{}
 	}
@@ -136,6 +141,7 @@ func GetUserInfo(userDbId primitive.ObjectID) (err int, userStats UserInfoFetch)
 	for i := 0; i < len(userStats.Posts); i++ {
 		scorePost, _ := countScorePost(userStats.Posts[i], userDbId)
 		log.Printf("%s", strconv.Itoa(scorePost))
+		// update the score
 		userStats.GlobalScore += scorePost
 		log.Printf("%s", strconv.Itoa(userStats.GlobalScore))
 	}
