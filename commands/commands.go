@@ -358,6 +358,7 @@ var (
 
 				} else if statsType == "Mentionable" {
 					log.Println("Running the stats command for a user")
+					// query the db id of the requested user (the one chosen in the stat command)
 					userExist, userDbId := db.CheckUser(i.ApplicationCommandData().Options[0].UserValue(s).ID)
 
 					if !userExist {
@@ -376,6 +377,7 @@ var (
 						return
 					}
 
+					// get the user info of the requested user
 					err1, userStats := db.GetUserInfo(userDbId)
 
 					if err1 != 0 {
@@ -393,24 +395,8 @@ var (
 						}
 					}
 
-					err2, userId := db.GetDiscordId(userStats.ID)
-
-					if err2 != nil {
-						log.Printf("An error append sending back the GetDiscordId error message to discord: %s", err2)
-
-						err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-							Type: discordgo.InteractionResponseChannelMessageWithSource,
-							Data: &discordgo.InteractionResponseData{
-								Content: "Sorry but something bad happened while getting the discord id",
-							},
-						})
-
-						if err != nil {
-							log.Fatalf("An error occured while responding to the register post interaction: %s", err)
-						}
-					}
-
-					postUser := discordgo.User{ID: userId}
+					// init the user class to be able to mention him
+					postUser := discordgo.User{ID: i.ApplicationCommandData().Options[0].UserValue(s).ID}
 
 					err3 := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 						Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -422,8 +408,8 @@ var (
 									Fields: []*discordgo.MessageEmbedField{
 										{Name: "😁 User", Value: postUser.Mention(), Inline: false},
 										{Name: "🆔 User database ID", Value: userStats.ID.Hex(), Inline: true},
-										{Name: "🆔 User discord ID", Value: userId, Inline: true},
-										{Name: "📨 Number of post", Value: strconv.Itoa(len(userStats.Posts)), Inline: false},
+										{Name: "🆔 User discord ID", Value: i.ApplicationCommandData().Options[0].UserValue(s).ID, Inline: true},
+										{Name: "📨 Number of posts", Value: strconv.Itoa(len(userStats.Posts)), Inline: false},
 										{Name: "🏆 Global Score", Value: strconv.Itoa(userStats.GlobalScore), Inline: false},
 									},
 								},
@@ -434,17 +420,6 @@ var (
 					if err3 != nil {
 						log.Fatalf("An error occured while sending back the user stats: %s", err3)
 					}
-
-					//err3 := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-					//	Type: discordgo.InteractionResponseChannelMessageWithSource,
-					//	Data: &discordgo.InteractionResponseData{
-					//		Content: "Sorry but the user stat is not yet dev 😅",
-					//	},
-					//})
-
-					//if err3 != nil {
-					//	log.Fatalf("An error occured while responding to the post stats interaction: %s", err3)
-					//}
 				} else {
 					log.Fatalf("Something bad append while determinating the value of the passed argument")
 				}
