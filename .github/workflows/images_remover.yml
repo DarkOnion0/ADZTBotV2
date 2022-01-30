@@ -16,13 +16,6 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v2
-      
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install jq wget
-          wget -o gh-cli.deb ${{ env.GH_CLI_DEB }}
-          sudo apt install /gh-cli.deb
           
       - name: Delete old container images
         env:
