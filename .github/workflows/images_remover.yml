@@ -1,0 +1,21 @@
+name: Images autoremove
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'
+
+jobs:
+  clean-ghcr:
+    name: Delete old unused container images
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - name: Delete old images
+        uses: snok/container-retention-policy@v1
+        with:
+          cut-off: One week ago UTC
+          untagged-only: true
+          keep-at-least: 10
+          account-type: personal
+          token: ${{ secrets.GITHUB_TOKEN }}
