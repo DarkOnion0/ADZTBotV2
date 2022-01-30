@@ -19,10 +19,10 @@ jobs:
       
       - name: Install dependencies
         run: |
-          apt update
-          apt install jq wget
+          sudo apt update
+          sudo apt install jq wget
           wget -o gh-cli.deb ${{ env.GH_CLI_DEB }}
-          apt install /gh-cli.deb
+          sudo apt install /gh-cli.deb
           
       - name: Delete old container images
         env:
