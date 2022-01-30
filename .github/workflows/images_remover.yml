@@ -5,6 +5,9 @@ on:
   schedule:
     - cron: '0 0 * * 1'
 
+env:
+  GH_CLI_DEB: https://github.com/cli/cli/releases/download/v2.4.0/gh_2.4.0_linux_amd64.deb
+
 jobs:
   clean-ghcr:
     name: Delete old unused container images
@@ -12,11 +15,17 @@ jobs:
     permissions:
       packages: write
     steps:
-      - name: Delete old images
-        uses: snok/container-retention-policy@v1
-        with:
-          cut-off: One week ago UTC
-          untagged-only: true
-          keep-at-least: 10
-          account-type: personal
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v2
+      
+      - name: Install dependencies
+        run: |
+          apt update
+          apt install jq wget
+          wget -o gh-cli.deb ${{ env.GH_CLI_DEB }}
+          apt install /gh-cli.deb
+          
+      - name: Delete old container images
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash delete_remote_images.sh
+          
