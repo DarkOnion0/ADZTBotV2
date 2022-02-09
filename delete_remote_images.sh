@@ -27,10 +27,12 @@ fi
 echo -e "\nDeleting dangling images..."
 while read -r line; do
 	id="$line"
-	## Workaround for https://github.com/cli/cli/issues/4286 and https://github.com/cli/cli/issues/3937
-	echo $id $container $temp_file 
+	url="https://api.github.com/user/packages/container/$container/versions/$id"
+
+	echo $id $container $temp_file $url
 	echo -e "/user/packages/container/${container}/versions/${id}"
-	curl -X DELETE -u $auth -H "Accept: application/vnd.github.v3+json" https://api.github.com/user/packages/container/${container}/versions/${id}
+
+	curl -X DELETE -u $auth -H "Accept: application/vnd.github.v3+json" $url
 	echo Dangling image with ID $id deleted successfully
 done <<< $ids_to_delete
 
