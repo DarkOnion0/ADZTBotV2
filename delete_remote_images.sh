@@ -27,7 +27,9 @@ echo -e "\nDeleting dangling images..."
 while read -r line; do
 	id="$line"
 	## Workaround for https://github.com/cli/cli/issues/4286 and https://github.com/cli/cli/issues/3937
-	echo $id $container $temp_file "/user/packages/container/${container}/versions/${id}"
+	cat $ids_to_delete
+	echo $id $container $temp_file 
+	echo -e "/user/packages/container/${container}/versions/${id}"
 	echo -n | gh api --method DELETE /user/packages/container/${container}/versions/${id} --input -
 	echo Dangling image with ID $id deleted successfully
 done <<< $ids_to_delete
