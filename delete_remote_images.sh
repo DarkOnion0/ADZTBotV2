@@ -15,6 +15,8 @@ gh api /user/packages/container/${container}/versions --paginate > $temp_file
 
 ids_to_delete=$(cat "$temp_file" | jq -r '.[] | select(.metadata.container.tags==[]) | .id')
 
+ls -larth
+
 if [ "${ids_to_delete}" = "" ]
 then
 	echo "There are no dangling images to remove for this package"
@@ -25,6 +27,7 @@ echo -e "\nDeleting dangling images..."
 while read -r line; do
 	id="$line"
 	## Workaround for https://github.com/cli/cli/issues/4286 and https://github.com/cli/cli/issues/3937
+	echo $id $container $temp_file
 	echo -n | gh api --method DELETE /user/packages/container/${container}/versions/${id} --input -
 	echo Dangling image with ID $id deleted successfully
 done <<< $ids_to_delete
