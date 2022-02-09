@@ -8,6 +8,7 @@ set -e
 # You need to be logged to 'gh' first
 container="adztbotv2"
 temp_file="ghcr_prune.ids"
+
 rm -rf $temp_file
 
 echo "Fetching dangling images from GHCR..."
@@ -27,10 +28,9 @@ echo -e "\nDeleting dangling images..."
 while read -r line; do
 	id="$line"
 	## Workaround for https://github.com/cli/cli/issues/4286 and https://github.com/cli/cli/issues/3937
-	cat $ids_to_delete
 	echo $id $container $temp_file 
 	echo -e "/user/packages/container/${container}/versions/${id}"
-	echo -n | gh api --method DELETE /user/packages/container/${container}/versions/${id} --input -
+	curl -X DELETE -u $auth -H "Accept: application/vnd.github.v3+json" https://api.github.com/user/packages/container/${container}/versions/${id}
 	echo Dangling image with ID $id deleted successfully
 done <<< $ids_to_delete
 
