@@ -17,4 +17,5 @@ jobs:
       - name: Delete old container images
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: auth="$GITHUB_REPOSITORY_OWNER:$GH_TOKEN" bash delete_remote_images.sh
+          TOKEN: ${{ secrets.TOKEN }}
+        run: auth="$GITHUB_REPOSITORY_OWNER:$TOKEN" bash delete_remote_images.sh
