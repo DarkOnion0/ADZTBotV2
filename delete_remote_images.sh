@@ -29,8 +29,8 @@ while read -r line; do
 	id="$line"
 	url="https://api.github.com/user/packages/container/$container/versions/$id"
 
-	echo $id $container $temp_file $url
-	echo -e "/user/packages/container/${container}/versions/${id}"
+	#echo $id $container $temp_file $url
+	#echo -e "/user/packages/container/${container}/versions/${id}"
 
 	curl -X DELETE -u $auth -H "Accept: application/vnd.github.v3+json" $url
 	echo Dangling image with ID $id deleted successfully
