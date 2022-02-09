@@ -4,19 +4,16 @@
 set -e
 
 # Simple script to remove dangling images from GHCR.
-# You need to have installed gh cli and jq for this script to work properly
-# You need to be logged to 'gh' first
+# You need to have installed jq for this script to work properly
 container="adztbotv2"
 temp_file="ghcr_prune.ids"
 
 rm -rf $temp_file
 
 echo "Fetching dangling images from GHCR..."
-gh api /user/packages/container/${container}/versions --paginate > $temp_file
+curl -u $auth -H "Accept: application/vnd.github.v3+json" https://api.github.com/user/packages/container/$container/versions > $temp_file
 
 ids_to_delete=$(cat "$temp_file" | jq -r '.[] | select(.metadata.container.tags==[]) | .id')
-
-ls -larth
 
 if [ "${ids_to_delete}" = "" ]
 then
