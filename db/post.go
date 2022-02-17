@@ -156,7 +156,7 @@ func GetVote(postId string, userId primitive.ObjectID) (err error, globalVote in
 	} else {
 		err = nil
 		// count the vote score of the post
-		globalVote, userVote = countScorePost(postFetch, userId)
+		globalVote, userVote = CountScorePost(postFetch, userId)
 
 		return err, globalVote, userVote, postFetch
 	}
@@ -164,7 +164,9 @@ func GetVote(postId string, userId primitive.ObjectID) (err error, globalVote in
 	return errors.New("the function shouldn't arrive there"), globalVote, userVote, PostRecordFetchT{}
 }
 
-func countScorePost(postRecord PostRecordFetchT, userId primitive.ObjectID) (globalVote int, userVote string) {
+// CountScorePost function calculate the total score of a post according to the provided post (postRecord),
+// it can also return the score of a specific user on this post according to the provided db id (userId)
+func CountScorePost(postRecord PostRecordFetchT, userId primitive.ObjectID) (globalVote int, userVote string) {
 	userVote = "You haven't yet vote on this post 😅"
 	globalVote = 0
 

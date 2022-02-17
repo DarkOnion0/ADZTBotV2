@@ -139,7 +139,7 @@ func GetUserInfo(userDbId primitive.ObjectID) (err int, userStats UserInfoFetch)
 
 	// iterate over all the fetched document
 	for i := 0; i < len(userStats.Posts); i++ {
-		scorePost, _ := countScorePost(userStats.Posts[i], userDbId)
+		scorePost, _ := CountScorePost(userStats.Posts[i], userDbId)
 		log.Printf("%s", strconv.Itoa(scorePost))
 		// update the score
 		userStats.GlobalScore += scorePost
