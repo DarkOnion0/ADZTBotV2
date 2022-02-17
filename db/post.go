@@ -35,6 +35,9 @@ type postVote struct {
 	Vote string
 }
 
+var ErrNoDocument = errors.New("the selected post doesn't exist")
+var ErrWrongUserDbId = errors.New("the provided user db id is different from the wanted one")
+
 // The Post function check if post exist in the database according to his link.
 //
 // 1. If it not exists the post will be added and the function will return (true, OBJECTID)
@@ -165,7 +168,7 @@ func GetVote(postId string, userId primitive.ObjectID) (err error, globalVote in
 }
 
 // CountScorePost function calculate the total score of a post according to the provided post (postRecord),
-// it can also return the score of a specific user on this post according to the provided db id (userId)
+// it can also return the score of a specific user on this post according to the provided db id (userDbId)
 func CountScorePost(postRecord PostRecordFetchT, userId primitive.ObjectID) (globalVote int, userVote string) {
 	userVote = "You haven't yet vote on this post 😅"
 	globalVote = 0
@@ -189,4 +192,36 @@ func CountScorePost(postRecord PostRecordFetchT, userId primitive.ObjectID) (glo
 	}
 
 	return
+}
+
+func DeletePost(postId, userDbId primitive.ObjectID) (err error) {
+	postCollection := config.Client.Database(*config.DBName).Collection("post")
+
+	var postRecordFetch PostRecordFetchT
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	err1 := postCollection.FindOne(ctx, bson.D{{Key: "_id", Value: postId}}).Decode(&postRecordFetch)
+
+	if err1 != nil {
+		if err1 == mongo.ErrNoDocuments {
+			return ErrNoDocument
+		}
+		log.Fatalf("Somethings bad append while fetching the post in the Delete function: %s", err1)
+	}
+
+	if postRecordFetch.User == userDbId {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		_, err2 := postCollection.DeleteOne(ctx, bson.D{{Key: "_id", Value: postId}})
+
+		if err2 != nil {
+			return errors.New("something bad append while deleting the provided post")
+		}
+
+		log.Printf("Successfully deleted post %s reqested by %s", postId, userDbId.Hex())
+
+		return
+	}
+
+	return ErrWrongUserDbId
 }

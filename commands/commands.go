@@ -7,6 +7,7 @@ import (
 
 	"github.com/DarkOnion0/ADZTBotV2/config"
 	"github.com/bwmarrin/discordgo"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/DarkOnion0/ADZTBotV2/db"
 )
@@ -50,6 +51,18 @@ var (
 				{
 					Name:        "url",
 					Description: "The link of your publication",
+					Type:        discordgo.ApplicationCommandOptionString,
+					Required:    true,
+				},
+			},
+		},
+		{
+			Name:        "delete",
+			Description: "Delete a post",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Name:        "postid",
+					Description: "The id of the publication you want",
 					Type:        discordgo.ApplicationCommandOptionString,
 					Required:    true,
 				},
@@ -433,6 +446,97 @@ var (
 				if err != nil {
 					log.Fatalf("An error occured while responding to the register post interaction: %s", err)
 				}
+			}
+		},
+		"delete": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			var userDiscord *discordgo.User
+
+			if i.Member != nil {
+				userDiscord = i.Member.User
+				log.Printf("Post command has been triggerd by %s", i.Member.User.ID)
+			} else {
+				userDiscord = i.User
+				log.Printf("Post command has been triggerd by %s", i.User.ID)
+			}
+
+			// check if user exist in the db and retrieve is db id
+			userExists, userDbId := db.CheckUser(userDiscord.ID)
+
+			if !userExists {
+				log.Printf("The requested user %s is not register in the database", userDiscord.ID)
+
+				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: "The requested user is not register in the database 😞",
+					},
+				})
+
+				if err != nil {
+					log.Fatalf("An error occured while sending back the checkuser error message to discord: %s", err)
+				}
+				return
+			}
+
+			// convert the command argument from a string to a primitive.ObjectID
+			postId, _ := primitive.ObjectIDFromHex(i.ApplicationCommandData().Options[0].StringValue())
+
+			// delete the post according to the user and the post db id
+			err1 := db.DeletePost(postId, userDbId)
+
+			// check the error message from the DeletePost function and send back message the discord
+			if err1 != nil {
+				log.Printf("Somethings bad append while deleting a post: %s", err1)
+
+				switch err1 {
+				case db.ErrNoDocument:
+					err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+						Type: discordgo.InteractionResponseChannelMessageWithSource,
+						Data: &discordgo.InteractionResponseData{
+							Content: "Something bad append deleting the post: this postId does not exist 😞",
+						},
+					})
+
+					if err != nil {
+						log.Fatalf("An error occured while sending back the error message to discord: %s", err)
+					}
+					return
+				case db.ErrWrongUserDbId:
+					err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+						Type: discordgo.InteractionResponseChannelMessageWithSource,
+						Data: &discordgo.InteractionResponseData{
+							Content: "Something bad append deleting the post: only user with the bot admin role or the post author can delete a post 😞",
+						},
+					})
+
+					if err != nil {
+						log.Fatalf("An error occured while sending back the error message to discord: %s", err)
+					}
+					return
+				}
+
+				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: "Something bad append while deleting the post 😞",
+					},
+				})
+
+				if err != nil {
+					log.Fatalf("An error occured while sending back the checkuser error message to discord: %s", err)
+				}
+				return
+			}
+
+			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: fmt.Sprintf("Post `%s` successfully deleted 👍", i.ApplicationCommandData().Options[0].StringValue()),
+				},
+			})
+
+			if err != nil {
+				log.Fatalf("An error occured while responding to the vote interaction: %s", err)
 			}
 		},
 	}
