@@ -18,4 +18,5 @@ var (
 	BotToken     = flag.String("token", "", "Bot access token")
 	ChannelMusic = flag.String("chanm", "", "Discord channel id where the post of the music category will be sent to")
 	ChannelVideo = flag.String("chanv", "", "Discord channel id where the post of the video category will be sent to")
+	BotAdminRole = flag.String("admin", "0", "The bot administrator discord role ID")
 )
