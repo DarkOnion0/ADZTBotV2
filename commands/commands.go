@@ -449,21 +449,34 @@ var (
 			}
 		},
 		"delete": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			var userDiscord *discordgo.User
+			if i.Member == nil {
+				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: "Sorry but this command is only available in a discord server not here 😞",
+					},
+				})
 
-			if i.Member != nil {
-				userDiscord = i.Member.User
-				log.Printf("Post command has been triggerd by %s", i.Member.User.ID)
-			} else {
-				userDiscord = i.User
-				log.Printf("Post command has been triggerd by %s", i.User.ID)
+				if err != nil {
+					log.Fatalf("An error occured while sending back the error message to discord: %s", err)
+				}
 			}
 
 			// check if user exist in the db and retrieve is db id
-			userExists, userDbId := db.CheckUser(userDiscord.ID)
+			userExists, userDbId := db.CheckUser(i.Member.User.ID)
+
+			isBotAdmin := false
+
+			if *config.BotAdminRole != "0" {
+				for index := 0; index < len(i.Member.Roles); index++ {
+					if i.Member.Roles[index] == *config.BotAdminRole {
+						isBotAdmin = true
+					}
+				}
+			}
 
 			if !userExists {
-				log.Printf("The requested user %s is not register in the database", userDiscord.ID)
+				log.Printf("The requested user %s is not register in the database", i.Member.User.ID)
 
 				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -482,7 +495,7 @@ var (
 			postId, _ := primitive.ObjectIDFromHex(i.ApplicationCommandData().Options[0].StringValue())
 
 			// delete the post according to the user and the post db id
-			err1 := db.DeletePost(postId, userDbId)
+			err1 := db.DeletePost(postId, userDbId, isBotAdmin)
 
 			// check the error message from the DeletePost function and send back message the discord
 			if err1 != nil {

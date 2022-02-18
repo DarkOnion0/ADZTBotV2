@@ -194,7 +194,7 @@ func CountScorePost(postRecord PostRecordFetchT, userId primitive.ObjectID) (glo
 	return
 }
 
-func DeletePost(postId, userDbId primitive.ObjectID) (err error) {
+func DeletePost(postId, userDbId primitive.ObjectID, isBotAdmin bool) (err error) {
 	postCollection := config.Client.Database(*config.DBName).Collection("post")
 
 	var postRecordFetch PostRecordFetchT
@@ -209,7 +209,7 @@ func DeletePost(postId, userDbId primitive.ObjectID) (err error) {
 		log.Fatalf("Somethings bad append while fetching the post in the Delete function: %s", err1)
 	}
 
-	if postRecordFetch.User == userDbId {
+	if postRecordFetch.User == userDbId || isBotAdmin {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 		_, err2 := postCollection.DeleteOne(ctx, bson.D{{Key: "_id", Value: postId}})
