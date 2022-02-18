@@ -36,6 +36,8 @@ pretty easy right ?!
    -token #Bot access token
 
    -url #The mongodb access url
+   
+   -admin #The bot administrator discord role ID
 
    ```
 
