@@ -303,7 +303,7 @@ var (
 
 			// check if user exist in the db
 			userExists, userDbId := db.CheckUser(userDiscord.ID)
-			fmt.Println(userExists, len(i.ApplicationCommandData().Options))
+			//fmt.Println(userExists, len(i.ApplicationCommandData().Options))
 
 			// execute this block only if the user exist in the db
 			if userExists && len(i.ApplicationCommandData().Options) != 2 {
@@ -393,8 +393,8 @@ var (
 					// get the user info of the requested user
 					err1, userStats := db.GetUserInfo(userDbId)
 
-					if err1 != 0 {
-						log.Printf("An error append while running the GetUserInfo command (user has no post, doesnt exist...): %s", strconv.Itoa(err1))
+					if err1 != nil {
+						log.Printf("An error append while running the GetUserInfo command (user has no post, doesnt exist...): %s", err1)
 
 						err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 							Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -406,6 +406,8 @@ var (
 						if err != nil {
 							log.Fatalf("An error occured while sending back the GetUserInfo error message to discord: %s", err)
 						}
+
+						return
 					}
 
 					// init the user class to be able to mention him
