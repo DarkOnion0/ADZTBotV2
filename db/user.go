@@ -31,6 +31,10 @@ type UserInfoFetch struct {
 	GlobalScore int
 }
 
+var ErrFetchingPost = errors.New("somethings bad append while fetching post")
+
+var ErrNoPost = errors.New("the selected user has no post shared")
+
 // CheckUser function check if a user exists in the database according to his discord id
 func CheckUser(userId string) (bool, primitive.ObjectID) {
 	userInfoCollection := config.Client.Database(*config.DBName).Collection("userInfo")
@@ -92,8 +96,7 @@ func GetDiscordId(userDbId primitive.ObjectID) (err error, userId string) {
 }
 
 // GetUserInfo function get and return all the user infos according to the provided mongodb _id
-func GetUserInfo(userDbId primitive.ObjectID) (err int, userStats UserInfoFetch) {
-	// TODO update the error handling in this function
+func GetUserInfo(userDbId primitive.ObjectID) (err error, userStats UserInfoFetch) {
 
 	// init the mongodb collection
 	postCollection := config.Client.Database(*config.DBName).Collection("post")
@@ -114,7 +117,7 @@ func GetUserInfo(userDbId primitive.ObjectID) (err int, userStats UserInfoFetch)
 
 	if err1 != nil {
 		if err1 == mongo.ErrNoDocuments {
-			return 1, UserInfoFetch{}
+			return ErrNoDocument, UserInfoFetch{}
 		}
 		log.Fatalf("An error occured while fetching the userId: %s", err1)
 		//return errors.New("An error occurred while fetching the post"), false
@@ -127,14 +130,14 @@ func GetUserInfo(userDbId primitive.ObjectID) (err int, userStats UserInfoFetch)
 	if err2 != nil {
 		log.Fatalf("Something bad append while fetching all the document in mongodb %s", err2)
 
-		return 2, UserInfoFetch{}
+		return ErrFetchingPost, UserInfoFetch{}
 	}
 
 	log.Println(userStats.Posts)
 
 	// Return an error of type 3 if a user as posted anything
 	if len(userStats.Posts) == 0 {
-		return 3, UserInfoFetch{}
+		return ErrNoPost, UserInfoFetch{}
 	}
 
 	// iterate over all the fetched document
