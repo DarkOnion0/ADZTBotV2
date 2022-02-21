@@ -23,5 +23,6 @@ ENV URL none
 ENV CHANM none
 ENV CHANV none
 ENV TOKEN none
+ENV ADMIN none
 
-CMD ["sh", "-c", "./ADZTBotV2 -db $DB -url $URL -chanm $CHANM -chanv $CHANV -token $TOKEN"]
+CMD ["sh", "-c", "./ADZTBotV2 -db $DB -url $URL -chanm $CHANM -chanv $CHANV -token $TOKEN -admin $ADMIN"]
