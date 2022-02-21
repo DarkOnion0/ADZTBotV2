@@ -78,7 +78,7 @@ Execute the following command and replace the env variables value by your own (y
 docker by the way)
 
 ```sh
-podman run -dt -e DB=$db -e URL=$url -e CHANM=$chanm -e CHANV=$chanv -e TOKEN=$token localhost adztbotv2-local:latest
+podman run -dt -e DB=$db -e URL=$url -e CHANM=$chanm -e CHANV=$chanv -e TOKEN=$token -e ADMIN=$admin localhost adztbotv2-local:latest
 ```
 
 #### 🌉 Supported Container Platform
