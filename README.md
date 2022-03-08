@@ -38,6 +38,8 @@ pretty easy right ?!
    -url #The mongodb access url
    
    -admin #The bot administrator discord role ID
+   
+   -debug #Sets log level to debug
 
    ```
 
@@ -78,7 +80,7 @@ Execute the following command and replace the env variables value by your own (y
 docker by the way)
 
 ```sh
-podman run -dt -e DB=$db -e URL=$url -e CHANM=$chanm -e CHANV=$chanv -e TOKEN=$token -e ADMIN=$admin localhost adztbotv2-local:latest
+podman run -dt -e DB=$db -e URL=$url -e CHANM=$chanm -e CHANV=$chanv -e TOKEN=$token -e ADMIN=$admin -e DEBUG=$debug adztbotv2 ghcr.io/darkonion0/adztbotv2:latest
 ```
 
 #### 🌉 Supported Container Platform

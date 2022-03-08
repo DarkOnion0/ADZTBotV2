@@ -23,6 +23,7 @@ ENV URL none
 ENV CHANM none
 ENV CHANV none
 ENV TOKEN none
-ENV ADMIN none
+ENV ADMIN 0
+ENV DEBUG false
 
-CMD ["sh", "-c", "./ADZTBotV2 -db $DB -url $URL -chanm $CHANM -chanv $CHANV -token $TOKEN -admin $ADMIN"]
+CMD ["sh", "-c", "./ADZTBotV2 -db $DB -url $URL -chanm $CHANM -chanv $CHANV -token $TOKEN -admin $ADMIN -debug $DEBUG"]
