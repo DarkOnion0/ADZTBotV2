@@ -2,6 +2,10 @@ name: Release Binary
 
 on:
   workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag name of the existing release'
+        required: true
   release:
     types: [published]
 
@@ -19,7 +23,12 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
           
-      - name: Format tag
+      - name: Format tag (manual trigger)
+        if: github.event_name == 'workflow_dispatch'
+        run: echo "VERSION=${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
+          
+      - name: Format tag (auto trigger)
+        if: github.event_name != 'workflow_dispatch'
         run: |
           # Strip git ref prefix from version
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
