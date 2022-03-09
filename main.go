@@ -2,16 +2,18 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"time"
 
 	"github.com/DarkOnion0/ADZTBotV2/commands"
 	"github.com/DarkOnion0/ADZTBotV2/config"
+	"github.com/rs/zerolog"
 
 	"github.com/bwmarrin/discordgo"
+
+	"github.com/rs/zerolog/log"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -20,10 +22,35 @@ import (
 var s *discordgo.Session
 
 func init() {
+	// enable or not the debug level (default is Info)
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	if *config.Debug == "true" {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	}
+
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	log.Logger = log.With().Caller().Logger()
+
+	log.Info().
+		Str("type", "main").
+		Str("function", "init").
+		Msg("Logger is configured!")
+
+	log.Debug().
+		Str("type", "main").
+		Str("function", "init").
+		Msg("Debug mode is enabled!")
+}
+
+func init() {
 	var err error
 	s, err = discordgo.New("Bot " + *config.BotToken)
 	if err != nil {
-		log.Fatalf("Invalid bot parameters: %v", err)
+		log.Fatal().
+			Err(err).
+			Str("type", "main").
+			Str("function", "init").
+			Msg("An error occurred, invalid bot parameters")
 	}
 }
 
@@ -43,7 +70,11 @@ func main() {
 	var errMongo error
 	config.Client, errMongo = mongo.NewClient(options.Client().ApplyURI(*config.DBUrl))
 	if errMongo != nil {
-		log.Fatal(errMongo)
+		log.Fatal().
+			Err(errMongo).
+			Str("type", "main").
+			Str("function", "main").
+			Msg("Something bad append while creating a the MongoDB client")
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -51,20 +82,35 @@ func main() {
 
 	errMongo = config.Client.Connect(ctx)
 	if errMongo != nil {
-		log.Fatal(errMongo)
+		log.Fatal().
+			Err(errMongo).
+			Str("type", "main").
+			Str("function", "main").
+			Msg("Something bad append while connecting to MongoDB")
 	}
 
 	errMongo = config.Client.Ping(ctx, readpref.Primary())
 	if errMongo != nil {
-		log.Fatal(errMongo)
+		log.Fatal().
+			Err(errMongo).
+			Str("type", "main").
+			Str("function", "main").
+			Msg("Something bad append while pinging the database, is it online ?!")
 	}
 
-	log.Println("DB is connected !")
+	log.Info().
+		Str("type", "main").
+		Str("function", "main").
+		Msg("DB is connected !")
 
 	defer func(c *mongo.Client) {
 		err := c.Disconnect(ctx)
 		if err != nil {
-			log.Fatalf("An error occured whle closing the bot: %s", err)
+			log.Fatal().
+				Err(err).
+				Str("type", "main").
+				Str("function", "main").
+				Msg("An error occured whle closing the bot")
 		}
 	}(config.Client)
 
@@ -73,29 +119,53 @@ func main() {
 	*/
 
 	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
-		log.Println("Bot is up!")
+		log.Info().
+			Str("type", "main").
+			Str("function", "main").
+			Msg("Bot is up!")
 	})
 	err := s.Open()
 	if err != nil {
-		log.Fatalf("Cannot open the session: %v", err)
+		log.Fatal().
+			Err(err).
+			Str("type", "main").
+			Str("function", "main").
+			Msg("Cannot open the discord session")
 	}
 
 	for _, v := range commands.Commands {
 		_, err := s.ApplicationCommandCreate(s.State.User.ID, *config.GuildID, v)
 		if err != nil {
-			log.Panicf("Cannot create '%v' command: %v", v.Name, err)
+			log.Panic().
+				Err(err).
+				Str("type", "main").
+				Str("function", "main").
+				Str("command", v.Name).
+				Msg("Cannot create command")
 		}
+		log.Debug().
+			Str("type", "main").
+			Str("function", "main").
+			Str("command", v.Name).
+			Msg("Command has been successfully created")
 	}
 
 	defer func(s *discordgo.Session) {
 		err := s.Close()
 		if err != nil {
-			fmt.Printf("An error occured whle closing the bot: %s", err)
+			log.Fatal().
+				Err(err).
+				Str("type", "main").
+				Str("function", "main").
+				Msg("An error occured whle closing the bot")
 		}
 	}(s)
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
 	<-stop
-	log.Println("Gracefully shutting down...")
+	log.Info().
+		Str("type", "main").
+		Str("function", "main").
+		Msg("Gracefully shutting down the bot...")
 }

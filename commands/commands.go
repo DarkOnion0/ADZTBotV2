@@ -2,24 +2,26 @@ package commands
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/DarkOnion0/ADZTBotV2/config"
+	"github.com/DarkOnion0/ADZTBotV2/db"
+	"github.com/rs/zerolog"
+
 	"github.com/bwmarrin/discordgo"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	"github.com/DarkOnion0/ADZTBotV2/db"
+	"github.com/rs/zerolog/log"
 )
 
 var (
 	Commands = []*discordgo.ApplicationCommand{
 		{
-			Name: "basic-command",
+			Name: "ping",
 			// All commands and options must have a description
 			// Commands/options without description will fail the registration
 			// of the command.
-			Description: "Basic command",
+			Description: "A little command to test if the bot is really up and running",
 		},
 		{
 			Name: "register",
@@ -117,39 +119,115 @@ var (
 		},
 	}
 	CommandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-		"basic-command": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		"ping": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			var userDiscord *discordgo.User
+
+			if i.Member != nil {
+				userDiscord = i.Member.User
+			} else {
+				userDiscord = i.User
+			}
+
+			log.Debug().
+				Str("userDiscordId", userDiscord.ID).
+				Str("type", "command").
+				Str("function", "ping").
+				Msg("Command has been triggered")
+
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: "Hey there! Congratulations, you just executed your first slash command",
+					Content: "🏓 Pong !!!",
 				},
 			})
 			if err != nil {
-				log.Fatalf("An error occured while creting command handler for the basic-command: %s", err)
+				log.Error().
+					Err(err).
+					Str("userDiscordId", userDiscord.ID).
+					Str("type", "command").
+					Str("function", "ping").
+					Msg("An error occurred while responding to the command interaction")
 				return
 			}
 		},
 		"register": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			var registerMessage string
+			var userDiscord *discordgo.User
 
 			if i.Member != nil {
-				registerMessage = fmt.Sprintf("Thanks %s, your have been successfully registered", i.Member.Mention())
-				db.RegisterUser(i.Member.User.ID)
-				log.Printf("Register command has been triggerd by %s", i.Member.User.ID)
+				userDiscord = i.Member.User
 			} else {
-				registerMessage = fmt.Sprintf("Thanks %s, your have been successfully registered", i.User.Mention())
-				db.RegisterUser(i.User.ID)
-				log.Printf("Register command has been triggerd by %s", i.User.ID)
+				userDiscord = i.User
 			}
 
-			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			log.Debug().
+				Str("userDiscordId", userDiscord.ID).
+				Str("type", "command").
+				Str("function", "register").
+				Msg("Command has been triggered")
+
+			registerMessage = fmt.Sprintf("Thanks %s, your have been successfully registered", userDiscord.Mention())
+			err1 := db.RegisterUser(userDiscord.ID)
+
+			if err1 != nil {
+				log.Error().
+					Err(err1).
+					Str("userDiscordId", userDiscord.ID).
+					Str("type", "command").
+					Str("function", "register").
+					Msg("An error occurred while registering the user")
+
+				switch err1 {
+				case db.ErrUserAlreadyRegistered:
+					err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+						Type: discordgo.InteractionResponseChannelMessageWithSource,
+						Data: &discordgo.InteractionResponseData{
+							Content: "Something bad append while registering your user id, you are already registered",
+						},
+					})
+					if err != nil {
+						log.Error().
+							Err(err).
+							Str("userDiscordId", userDiscord.ID).
+							Str("type", "command").
+							Str("function", "register").
+							Msg("An error occurred while responding to the command interaction")
+						return
+					}
+				default:
+					err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+						Type: discordgo.InteractionResponseChannelMessageWithSource,
+						Data: &discordgo.InteractionResponseData{
+							Content: "Something bad append while registering your user id",
+						},
+					})
+					if err != nil {
+						log.Error().
+							Err(err).
+							Str("userDiscordId", userDiscord.ID).
+							Str("type", "command").
+							Str("function", "register").
+							Msg("An error occurred while responding to the command interaction")
+						return
+					}
+				}
+
+				return
+			}
+
+			err2 := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Content: registerMessage,
 				},
 			})
-			if err != nil {
-				log.Fatalf("An error occured while responding to the register command interaction: %s", err)
+			if err2 != nil {
+				log.Error().
+					Err(err2).
+					Str("userDiscordId", userDiscord.ID).
+					Str("type", "command").
+					Str("function", "register").
+					Msg("An error occurred while responding to the command interaction")
 				return
 			}
 		},
@@ -160,14 +238,44 @@ var (
 
 			if i.Member != nil {
 				userDiscord = i.Member.User
-				log.Printf("Post command has been triggerd by %s", i.Member.User.ID)
 			} else {
 				userDiscord = i.User
-				log.Printf("Post command has been triggerd by %s", i.User.ID)
 			}
+			log.Debug().
+				Str("userDiscordId", userDiscord.ID).
+				Str("type", "command").
+				Str("function", "post").
+				Msg("Command has been triggered")
 
 			// check if user exist in the db
-			userExists, userDbId := db.CheckUser(userDiscord.ID)
+			err0, userExists, userDbId := db.CheckUser(userDiscord.ID)
+
+			if err0 != nil {
+				log.Error().
+					Err(err0).
+					Str("userDiscordId", userDiscord.ID).
+					Str("type", "command").
+					Str("function", "post").
+					Msg("Something bad append while checking the user")
+
+				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: "Something bad append while running the command",
+					},
+				})
+				if err != nil {
+					log.Error().
+						Err(err).
+						Str("userDiscordId", userDiscord.ID).
+						Str("type", "command").
+						Str("function", "post").
+						Msg("An error occurred while responding to the command interaction")
+					return
+				}
+
+				return
+			}
 
 			// execute this block only if the user exist in the db
 			if userExists {
@@ -181,7 +289,13 @@ var (
 						},
 					})
 					if err != nil {
-						log.Fatalf("An error occured while responding to the register post interaction: %s", err)
+						log.Error().
+							Err(err).
+							Str("userDiscordId", userDiscord.ID).
+							Str("type", "command").
+							Str("function", "post").
+							Msg("An error occurred while responding to the command interaction")
+						return
 					}
 
 					message := fmt.Sprintf("**Posted by:**              %s \n**PostID:**                    %s \n**Link:**                         %s", userDiscord.Mention(), postId, i.ApplicationCommandData().Options[1].StringValue())
@@ -189,15 +303,43 @@ var (
 					// check where the post should be sent to
 					if i.ApplicationCommandData().Options[0].StringValue() == "music" {
 						_, err2 := s.ChannelMessageSend(*config.ChannelMusic, message)
+						log.Info().
+							Str("userDiscordId", userDiscord.ID).
+							Str("type", "command").
+							Str("function", "post").
+							Str("postType", "music").
+							Str("channel", *config.ChannelMusic).
+							Msg("Post has been sent to the corresponding channel")
 
 						if err2 != nil {
-							log.Fatalf("An error occured while sending the music message: %s", err2)
+							log.Error().
+								Err(err2).
+								Str("userDiscordId", userDiscord.ID).
+								Str("type", "command").
+								Str("function", "post").
+								Str("postType", "music").
+								Msg("An error occurred while sending the post")
+							return
 						}
 					} else {
 						_, err2 := s.ChannelMessageSend(*config.ChannelVideo, message)
+						log.Info().
+							Str("userDiscordId", userDiscord.ID).
+							Str("type", "command").
+							Str("function", "post").
+							Str("postType", "video").
+							Str("channel", *config.ChannelVideo).
+							Msg("Post has been sent to the corresponding channel")
 
 						if err2 != nil {
-							log.Fatalf("An error occured while sending the video message: %s", err2)
+							log.Error().
+								Err(err2).
+								Str("userDiscordId", userDiscord.ID).
+								Str("type", "command").
+								Str("function", "post").
+								Str("postType", "video").
+								Msg("An error occurred while sending the post")
+							return
 						}
 					}
 
@@ -209,7 +351,13 @@ var (
 						},
 					})
 					if err != nil {
-						log.Fatalf("An error occured while responding to the register post interaction: %s", err)
+						log.Error().
+							Err(err).
+							Str("userDiscordId", userDiscord.ID).
+							Str("type", "command").
+							Str("function", "post").
+							Msg("An error occurred while responding to the command interaction")
+						return
 					}
 				}
 
@@ -221,7 +369,12 @@ var (
 					},
 				})
 				if err != nil {
-					log.Fatalf("An error occured while responding to the register post interaction: %s", err)
+					log.Error().
+						Err(err).
+						Str("userDiscordId", userDiscord.ID).
+						Str("type", "command").
+						Str("function", "post").
+						Msg("An error occurred while responding to the command interaction")
 				}
 			}
 		},
@@ -230,14 +383,44 @@ var (
 
 			if i.Member != nil {
 				userDiscord = i.Member.User
-				log.Printf("Post command has been triggerd by %s", i.Member.User.ID)
 			} else {
 				userDiscord = i.User
-				log.Printf("Post command has been triggerd by %s", i.User.ID)
 			}
+			log.Debug().
+				Str("userDiscordId", userDiscord.ID).
+				Str("type", "command").
+				Str("function", "vote").
+				Msg("Command has been triggered")
 
 			// check if user exist in the db
-			userExists, userDbId := db.CheckUser(userDiscord.ID)
+			err0, userExists, userDbId := db.CheckUser(userDiscord.ID)
+
+			if err0 != nil {
+				log.Error().
+					Err(err0).
+					Str("userDiscordId", userDiscord.ID).
+					Str("type", "command").
+					Str("function", "vote").
+					Msg("Something bad append while checking the user")
+
+				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: "Something bad append while running the command",
+					},
+				})
+				if err != nil {
+					log.Error().
+						Err(err).
+						Str("userDiscordId", userDiscord.ID).
+						Str("type", "command").
+						Str("function", "vote").
+						Msg("An error occurred while responding to the command interaction")
+					return
+				}
+
+				return
+			}
 
 			// execute this block only if the user exist in the db
 			if userExists {
@@ -253,9 +436,23 @@ var (
 						},
 					})
 					if err != nil {
-						log.Fatalf("An error occured while responding to the vote interaction: %s", err)
+						log.Error().
+							Err(err).
+							Str("userDiscordId", userDiscord.ID).
+							Str("type", "command").
+							Str("function", "vote").
+							Msg("An error occurred while responding to the command interaction")
+						return
 					}
-					log.Fatalf("An error occured while executing the vote function: %s", err1)
+					log.Error().
+						Err(err1).
+						Str("userDiscordId", userDiscord.ID).
+						Str("type", "command").
+						Str("function", "vote").
+						Str("userVote", i.ApplicationCommandData().Options[1].StringValue()).
+						Str("postId", i.ApplicationCommandData().Options[0].StringValue()).
+						Msg("An error occurred while setting the vote")
+					return
 				} else {
 
 					var postStatus string
@@ -267,6 +464,15 @@ var (
 						postStatus = "updated"
 					}
 
+					log.Info().
+						Str("userDiscordId", userDiscord.ID).
+						Str("type", "command").
+						Str("function", "vote").
+						Str("userVote", i.ApplicationCommandData().Options[1].StringValue()).
+						Str("postId", i.ApplicationCommandData().Options[0].StringValue()).
+						Str("postStatus", postStatus).
+						Msg("Post has been sent to the corresponding channel")
+
 					err2 := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 						Type: discordgo.InteractionResponseChannelMessageWithSource,
 						Data: &discordgo.InteractionResponseData{
@@ -275,7 +481,13 @@ var (
 					})
 
 					if err2 != nil {
-						log.Fatalf("An error occured while respondinf to the register post interaction: %s", err2)
+						log.Error().
+							Err(err2).
+							Str("userDiscordId", userDiscord.ID).
+							Str("type", "command").
+							Str("function", "vote").
+							Msg("An error occurred while responding to the command interaction")
+						return
 					}
 				}
 			} else {
@@ -286,7 +498,13 @@ var (
 					},
 				})
 				if err != nil {
-					log.Fatalf("An error occured while responding to the register post interaction: %s", err)
+					log.Error().
+						Err(err).
+						Str("userDiscordId", userDiscord.ID).
+						Str("type", "command").
+						Str("function", "vote").
+						Msg("An error occurred while responding to the command interaction")
+					return
 				}
 			}
 		},
@@ -295,15 +513,45 @@ var (
 
 			if i.Member != nil {
 				userDiscord = i.Member.User
-				log.Printf("Post command has been triggerd by %s", i.Member.User.ID)
 			} else {
 				userDiscord = i.User
-				log.Printf("Post command has been triggerd by %s", i.User.ID)
 			}
 
+			log.Debug().
+				Str("userDiscordId", userDiscord.ID).
+				Str("type", "command").
+				Str("function", "stats").
+				Msg("Command has been triggered")
+
 			// check if user exist in the db
-			userExists, userDbId := db.CheckUser(userDiscord.ID)
-			//fmt.Println(userExists, len(i.ApplicationCommandData().Options))
+			err0, userExists, userDbId := db.CheckUser(userDiscord.ID)
+
+			if err0 != nil {
+				log.Error().
+					Err(err0).
+					Str("userDiscordId", userDiscord.ID).
+					Str("type", "command").
+					Str("function", "stats").
+					Msg("Something bad append while checking the user")
+
+				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: "Something bad append while running the command",
+					},
+				})
+				if err != nil {
+					log.Error().
+						Err(err).
+						Str("userDiscordId", userDiscord.ID).
+						Str("type", "command").
+						Str("function", "stats").
+						Msg("An error occurred while responding to the command interaction")
+					return
+				}
+
+				return
+			}
 
 			// execute this block only if the user exist in the db
 			if userExists && len(i.ApplicationCommandData().Options) != 2 {
@@ -311,41 +559,96 @@ var (
 				statsType := i.ApplicationCommandData().Options[0].Type.String()
 
 				if statsType == "String" {
-					log.Println("Running the stats command for a post")
-					// Get the votes and other information for a post
+					log.Debug().
+						Str("userDiscordId", userDiscord.ID).
+						Str("type", "command").
+						Str("function", "stats").
+						Str("statsType", "post").
+						Msg("Running the command for a specific statsType")
+
+					// Get the votes and other information for the selected post
 					err, globalVote, userVote, postFetch := db.GetVote(i.ApplicationCommandData().Options[0].StringValue(), userDbId)
 
 					if err != nil {
+						log.Error().
+							Err(err).
+							Str("userDiscordId", userDiscord.ID).
+							Str("type", "command").
+							Str("function", "vote").
+							Str("statsType", "post").
+							Str("userVote", userVote).
+							Str("postId", i.ApplicationCommandData().Options[0].StringValue()).
+							Msg("An error occurred while getting the vote")
+
 						err1 := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 							Type: discordgo.InteractionResponseChannelMessageWithSource,
 							Data: &discordgo.InteractionResponseData{
-								Content: fmt.Sprintf("An error occured while executing the vote function: %s", err),
+								Content: fmt.Sprintf("An error occured while executing the GetVote function: %s", err),
 							},
 						})
 						if err1 != nil {
-							log.Fatalf("An error occured while responding to the vote interaction: %s", err1)
+							log.Error().
+								Err(err1).
+								Str("userDiscordId", userDiscord.ID).
+								Str("type", "command").
+								Str("function", "stats").
+								Str("statsType", "post").
+								Msg("An error occurred while responding to the command interaction")
+							return
 						}
-						log.Fatalf("An error occured while executing the vote function: %s", err)
+						return
 					}
 
 					// Get the information about the user who share the post with db.GetVote function
 					err1, userId := db.GetDiscordId(postFetch.User)
 
 					if err1 != nil {
+						log.Error().
+							Err(err1).
+							Str("userDiscordId", userDiscord.ID).
+							Str("type", "command").
+							Str("function", "vote").
+							Str("statsType", "post").
+							Str("userVote", userVote).
+							Str("globalVote", strconv.Itoa(globalVote)).
+							Dict("post", zerolog.Dict().
+								Str("id", postFetch.ID.Hex()).
+								Str("user", postFetch.User.Hex())).
+							Msg("An error occurred while getting the user info of the post author")
+
 						err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 							Type: discordgo.InteractionResponseChannelMessageWithSource,
 							Data: &discordgo.InteractionResponseData{
-								Content: fmt.Sprintf("An error occured while executing the vote function: %s", err1),
+								Content: fmt.Sprintf("An error occured while executing the GetDiscordID function: %s", err1),
 							},
 						})
 						if err != nil {
-							log.Fatalf("An error occured while responding to the vote interaction: %s", err)
+							log.Error().
+								Err(err).
+								Str("userDiscordId", userDiscord.ID).
+								Str("type", "command").
+								Str("function", "stats").
+								Str("statsType", "post").
+								Msg("An error occurred while responding to the command interaction")
+							return
 						}
-						log.Fatalf("An error occured while executing the vote function: %s", err1)
+						return
 					}
 
 					// init the discord class for the user who share the post to be able to mention him
 					postUser := discordgo.User{ID: userId}
+
+					log.Info().
+						Str("userDiscordId", userDiscord.ID).
+						Str("type", "command").
+						Str("function", "vote").
+						Str("statsType", "post").
+						Str("userVote", userVote).
+						Str("globalVote", strconv.Itoa(globalVote)).
+						Dict("post", zerolog.Dict().
+							Str("id", postFetch.ID.Hex()).
+							Str("user", postFetch.User.Hex())).
+						Msg("Post has been sent to the corresponding channel")
 
 					err2 := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 						Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -366,16 +669,64 @@ var (
 					})
 
 					if err2 != nil {
-						log.Fatalf("An error occured while respondinf to the register post interaction: %s", err2)
+						log.Error().
+							Err(err2).
+							Str("userDiscordId", userDiscord.ID).
+							Str("type", "command").
+							Str("function", "stats").
+							Str("statsType", "post").
+							Msg("An error occurred while responding to the command interaction")
+						return
 					}
 
 				} else if statsType == "Mentionable" {
-					log.Println("Running the stats command for a user")
+					log.Debug().
+						Str("userDiscordId", userDiscord.ID).
+						Str("type", "command").
+						Str("function", "stats").
+						Str("statsType", "user").
+						Msg("Running the command for a specific statsType")
+
 					// query the db id of the requested user (the one chosen in the stat command)
-					userExist, userDbId := db.CheckUser(i.ApplicationCommandData().Options[0].UserValue(s).ID)
+					// not the one who has executed the discord command
+					err0, userExist, userDbId := db.CheckUser(i.ApplicationCommandData().Options[0].UserValue(s).ID)
+
+					if err0 != nil {
+						log.Error().
+							Err(err0).
+							Str("userDiscordId", userDiscord.ID).
+							Str("type", "command").
+							Str("function", "stats").
+							Str("statsType", "user").
+							Msg("Something bad append while checking the user")
+
+						err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+							Type: discordgo.InteractionResponseChannelMessageWithSource,
+							Data: &discordgo.InteractionResponseData{
+								Content: "Something bad append while running the command",
+							},
+						})
+						if err != nil {
+							log.Error().
+								Err(err).
+								Str("userDiscordId", userDiscord.ID).
+								Str("type", "command").
+								Str("function", "stats").
+								Str("statsType", "user").
+								Msg("An error occurred while responding to the command interaction")
+							return
+						}
+
+						return
+					}
 
 					if !userExist {
-						log.Printf("The requested user is not register in the database")
+						log.Error().
+							Str("userDiscordId", userDiscord.ID).
+							Str("type", "command").
+							Str("function", "stats").
+							Str("statsType", "user").
+							Msg("The requested user is not register in the database")
 
 						err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 							Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -385,7 +736,14 @@ var (
 						})
 
 						if err != nil {
-							log.Fatalf("An error occured while sending back the checkuser error message to discord: %s", err)
+							log.Error().
+								Err(err).
+								Str("userDiscordId", userDiscord.ID).
+								Str("type", "command").
+								Str("function", "stats").
+								Str("statsType", "user").
+								Msg("An error occurred while responding to the command interaction")
+							return
 						}
 						return
 					}
@@ -394,7 +752,15 @@ var (
 					err1, userStats := db.GetUserInfo(userDbId)
 
 					if err1 != nil {
-						log.Printf("An error append while running the GetUserInfo command (user has no post, doesnt exist...): %s", err1)
+						log.Error().
+							Err(err1).
+							Str("userDiscordId", userDiscord.ID).
+							Str("type", "command").
+							Str("function", "stats").
+							Str("statsType", "user").
+							Dict("userStats", zerolog.Dict().
+								Str("id", userDbId.Hex())).
+							Msg("Something bad append while running the GetUserInfo command (user has no post, doesnt exist...)")
 
 						err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 							Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -404,7 +770,14 @@ var (
 						})
 
 						if err != nil {
-							log.Fatalf("An error occured while sending back the GetUserInfo error message to discord: %s", err)
+							log.Error().
+								Err(err).
+								Str("userDiscordId", userDiscord.ID).
+								Str("type", "command").
+								Str("function", "stats").
+								Str("statsType", "user").
+								Msg("An error occurred while responding to the command interaction")
+							return
 						}
 
 						return
@@ -412,6 +785,17 @@ var (
 
 					// init the user class to be able to mention him
 					postUser := discordgo.User{ID: i.ApplicationCommandData().Options[0].UserValue(s).ID}
+
+					log.Info().
+						Str("userDiscordId", userDiscord.ID).
+						Str("type", "command").
+						Str("function", "stats").
+						Str("statsType", "user").
+						Str("userId", userDbId.Hex()).
+						Dict("userStats", zerolog.Dict().
+							Str("id", userStats.ID.Hex()).
+							Int("globalScore", userStats.GlobalScore)).
+						Msg("Post has been sent to the corresponding channel")
 
 					err3 := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 						Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -433,10 +817,23 @@ var (
 					})
 
 					if err3 != nil {
-						log.Fatalf("An error occured while sending back the user stats: %s", err3)
+						log.Error().
+							Err(err3).
+							Str("userDiscordId", userDiscord.ID).
+							Str("type", "command").
+							Str("function", "stats").
+							Str("statsType", "user").
+							Msg("An error occurred while responding to the command interaction")
+						return
 					}
 				} else {
-					log.Fatalf("Something bad append while determinating the value of the passed argument")
+					log.Error().
+						Str("userDiscordId", userDiscord.ID).
+						Str("type", "command").
+						Str("function", "stats").
+						Str("statsType", "user").
+						Msg("An error occurred while determinating the value of the passed argument")
+					return
 				}
 			} else {
 				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -446,12 +843,24 @@ var (
 					},
 				})
 				if err != nil {
-					log.Fatalf("An error occured while responding to the register post interaction: %s", err)
+					log.Error().
+						Err(err).
+						Str("userDiscordId", userDiscord.ID).
+						Str("type", "command").
+						Str("function", "stats").
+						Msg("An error occurred while responding to the command interaction")
+					return
 				}
 			}
 		},
 		"delete": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			if i.Member == nil {
+				log.Error().
+					Str("userDiscordId", i.User.ID).
+					Str("type", "command").
+					Str("function", "delete").
+					Msg("An error occurred while running the command, the user has not executed the command in a server")
+
 				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
@@ -460,25 +869,54 @@ var (
 				})
 
 				if err != nil {
-					log.Fatalf("An error occured while sending back the error message to discord: %s", err)
+					log.Error().
+						Err(err).
+						Str("userDiscordId", i.User.ID).
+						Str("type", "command").
+						Str("function", "delete").
+						Msg("An error occurred while responding to the command interaction")
+					return
 				}
+
+				return
 			}
 
 			// check if user exist in the db and retrieve is db id
-			userExists, userDbId := db.CheckUser(i.Member.User.ID)
+			err0, userExists, userDbId := db.CheckUser(i.Member.User.ID)
 
-			isBotAdmin := false
+			if err0 != nil {
+				log.Error().
+					Err(err0).
+					Str("userDiscordId", i.Member.User.ID).
+					Str("type", "command").
+					Str("function", "delete").
+					Msg("Something bad append while checking the user")
 
-			if *config.BotAdminRole != "0" {
-				for index := 0; index < len(i.Member.Roles); index++ {
-					if i.Member.Roles[index] == *config.BotAdminRole {
-						isBotAdmin = true
-					}
+				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: "Something bad append while running the command",
+					},
+				})
+				if err != nil {
+					log.Error().
+						Err(err).
+						Str("userDiscordId", i.Member.User.ID).
+						Str("type", "command").
+						Str("function", "delete").
+						Msg("An error occurred while responding to the command interaction")
+					return
 				}
+
+				return
 			}
 
 			if !userExists {
-				log.Printf("The requested user %s is not register in the database", i.Member.User.ID)
+				log.Error().
+					Str("userDiscordId", i.Member.User.ID).
+					Str("type", "command").
+					Str("function", "delete").
+					Msg("The user is not register in the database")
 
 				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -488,9 +926,41 @@ var (
 				})
 
 				if err != nil {
-					log.Fatalf("An error occured while sending back the checkuser error message to discord: %s", err)
+					log.Error().
+						Err(err).
+						Str("userDiscordId", i.Member.User.ID).
+						Str("type", "command").
+						Str("function", "delete").
+						Msg("An error occurred while responding to the command interaction")
+					return
 				}
+
 				return
+			}
+
+			isBotAdmin := false
+
+			log.Debug().
+				Str("userDiscordId", i.Member.User.ID).
+				Str("type", "command").
+				Str("function", "delete").
+				Str("userId", userDbId.Hex()).
+				Bool("isBotAdmin", isBotAdmin).
+				Msg("Checking if the user is a bot admin")
+
+			if *config.BotAdminRole != "0" {
+				for index := 0; index < len(i.Member.Roles); index++ {
+					if i.Member.Roles[index] == *config.BotAdminRole {
+						isBotAdmin = true
+
+						log.Debug().
+							Str("userDiscordId", i.Member.User.ID).
+							Str("type", "command").
+							Str("function", "delete").
+							Bool("isBotAdmin", isBotAdmin).
+							Msg("The user is a bot admin")
+					}
+				}
 			}
 
 			// convert the command argument from a string to a primitive.ObjectID
@@ -501,7 +971,15 @@ var (
 
 			// check the error message from the DeletePost function and send back message the discord
 			if err1 != nil {
-				log.Printf("Somethings bad append while deleting a post: %s", err1)
+				log.Error().
+					Err(err1).
+					Str("userDiscordId", i.Member.User.ID).
+					Str("type", "command").
+					Str("function", "delete").
+					Str("userId", userDbId.Hex()).
+					Bool("isBotAdmin", isBotAdmin).
+					Str("postId", i.ApplicationCommandData().Options[0].StringValue()).
+					Msg("Somethings bad append while deleting the post")
 
 				switch err1 {
 				case db.ErrNoDocument:
@@ -513,7 +991,13 @@ var (
 					})
 
 					if err != nil {
-						log.Fatalf("An error occured while sending back the error message to discord: %s", err)
+						log.Error().
+							Err(err).
+							Str("userDiscordId", i.Member.User.ID).
+							Str("type", "command").
+							Str("function", "delete").
+							Msg("An error occurred while responding to the command interaction")
+						return
 					}
 					return
 				case db.ErrWrongUserDbId:
@@ -525,8 +1009,15 @@ var (
 					})
 
 					if err != nil {
-						log.Fatalf("An error occured while sending back the error message to discord: %s", err)
+						log.Error().
+							Err(err).
+							Str("userDiscordId", i.Member.User.ID).
+							Str("type", "command").
+							Str("function", "delete").
+							Msg("An error occurred while responding to the command interaction")
+						return
 					}
+
 					return
 				}
 
@@ -538,8 +1029,15 @@ var (
 				})
 
 				if err != nil {
-					log.Fatalf("An error occured while sending back the checkuser error message to discord: %s", err)
+					log.Error().
+						Err(err).
+						Str("userDiscordId", i.Member.User.ID).
+						Str("type", "command").
+						Str("function", "delete").
+						Msg("An error occurred while responding to the command interaction")
+					return
 				}
+
 				return
 			}
 
@@ -551,7 +1049,13 @@ var (
 			})
 
 			if err != nil {
-				log.Fatalf("An error occured while responding to the vote interaction: %s", err)
+				log.Error().
+					Err(err).
+					Str("userDiscordId", i.Member.User.ID).
+					Str("type", "command").
+					Str("function", "delete").
+					Msg("An error occurred while responding to the command interaction")
+				return
 			}
 		},
 	}
