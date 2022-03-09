@@ -1,8 +1,6 @@
 # ADZTBotV2
 
-[![Go](https://github.com/DarkOnion0/ADZTBotV2/actions/workflows/go.yml/badge.svg)](https://github.com/DarkOnion0/ADZTBotV2/actions/workflows/go.yml) [![Container](https://github.com/DarkOnion0/ADZTBotV2/actions/workflows/container.yml/badge.svg)](https://github.com/DarkOnion0/ADZTBotV2/actions/workflows/container.yml)  
-
-[![Latest release](https://shields.io/github/v/release/DarkOnion0/ADZTBotV2?display_name=tag&include_prereleases&label=%F0%9F%93%A6%20Latest%20release)](https://shields.io/github/v/release/DarkOnion0/ADZTBotV2?display_name=tag&include_prereleases&label=%F0%9F%93%A6%20Latest%20release)
+[![Go](https://github.com/DarkOnion0/ADZTBotV2/actions/workflows/go.yml/badge.svg)](https://github.com/DarkOnion0/ADZTBotV2/actions/workflows/go.yml) [![Container](https://github.com/DarkOnion0/ADZTBotV2/actions/workflows/container.yml/badge.svg)](https://github.com/DarkOnion0/ADZTBotV2/actions/workflows/container.yml) [![Latest release](https://shields.io/github/v/release/DarkOnion0/ADZTBotV2?display_name=tag&include_prereleases&label=%F0%9F%93%A6%20Latest%20release)](https://shields.io/github/v/release/DarkOnion0/ADZTBotV2?display_name=tag&include_prereleases&label=%F0%9F%93%A6%20Latest%20release)
 
 > A little discord bot with a small footprint and easy to use to share music and video with your friends on your discord server
 
