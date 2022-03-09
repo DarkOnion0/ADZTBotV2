@@ -1,6 +1,7 @@
 name: Release Binary
 
 on:
+  workflow_dispatch:
   release:
     types: [published]
 
@@ -36,6 +37,8 @@ jobs:
 
   upload-binary:
     runs-on: ubuntu-latest
+    env:
+      GH_REPO: ${{ github.repository }}
     permissions:
       contents: write
     steps:
@@ -49,4 +52,4 @@ jobs:
       - name: Publish binary
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload ${GITHUB_REF} ./bin/*
+        run: gh release upload ${{ env.VERSION }} ./bin/*
