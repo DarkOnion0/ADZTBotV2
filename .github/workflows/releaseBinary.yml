@@ -18,11 +18,8 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
 
-      - name: Make script executable
-        run: chmod +x ./build.sh
-
       - name: Build
-        run: ./build.sh ${{ github.ref }}
+        run: bash build.sh ${{ github.ref }}
 
       - uses: actions/upload-artifact@v2
         with:
