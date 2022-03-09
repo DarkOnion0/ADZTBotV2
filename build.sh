@@ -17,8 +17,8 @@ if [ -z $1 ]; then
 	VERSION="latest"
 	echo "Running in manual mode, version=$VERSION"
 else
-	echo "Running in release mode, version=$1"
-	VERSION="$1"
+	VERSION=$(echo $1 | sed -e 's/\./-/g')
+	echo "Running in release mode, version=$VERSION"
 fi
 
 ###############################################
