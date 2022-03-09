@@ -53,6 +53,19 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v2
+      
+      - name: Format tag (manual trigger)
+        if: github.event_name == 'workflow_dispatch'
+        run: echo "VERSION=${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
+          
+      - name: Format tag (auto trigger)
+        if: github.event_name != 'workflow_dispatch'
+        run: |
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          
+          # Add VERSION to the action env
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - uses: actions/download-artifact@v2
         with:
