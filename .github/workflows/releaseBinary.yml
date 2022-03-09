@@ -46,6 +46,7 @@ jobs:
 
   upload-binary:
     runs-on: ubuntu-latest
+    needs: [build-project] 
     env:
       GH_REPO: ${{ github.repository }}
     permissions:
