@@ -20,3 +20,6 @@ bin
 # Remove the tracking of editor config file
 .idea
 .vscode
+
+# Remove the tracking of env file
+.envrc
