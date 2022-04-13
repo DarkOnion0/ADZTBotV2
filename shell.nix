@@ -6,20 +6,13 @@ pkgs.mkShell {
       go mod tidy
       go mod download
 
-      # Alias
-      alias build="bash ./build.sh"
-      alias cleanc="bash ./delete_remote_images.sh"
-      alias cleanb="rm -rf ./bin"
-
       # Welcome script
       echo -e "\n$(tput bold)Welcome in the nix-shell for ADZTBotV2$(tput sgr0)"
       
-      echo -e "\nList of custom command (only supputed in BASH) :"
-      echo -e "=================================================="
-      echo -e "- build    | run the compile script, accept 1 argument that will be used as the version tag"
-      echo -e "- cleanc   | clean the remote untagged ghcr images"
-      echo -e "- cleanb   | clean the build folder"
-      echo -e "=================================================="
+      echo -e "\nList of custom command using 'just' a 'GNU make' like software :"
+      echo -e "================================================================"
+      just -l
+      echo -e "================================================================"
     '';
 
     # nativeBuildInputs is usually what you want -- tools you need to run
@@ -29,5 +22,7 @@ pkgs.mkShell {
       pkgs.unzip
       pkgs.curl
       pkgs.jq
+      pkgs.just
+      pkgs.golangci-lint
      ];
 }
