@@ -1,9 +1,18 @@
-# Change the default just behaviour
+#!/usr/bin/env just --justfile
+
+# Just SETTINGS (vars...)
+set dotenv-load
+
+VERSION := "latest"
+export GH_TOKEN := ""
+export GH_REPO := env_var_or_default("GH_REPO", "DarkOnion0/ADZTBotV2")
+
+#Change the default just behaviour
 default:
   @just --list
 
 # Build ADZTBotV2 for all plateform
-build VERSION="":
+build:
     ./build.sh {{VERSION}}
 
 # Clean the remote GHCR container registry
@@ -29,6 +38,19 @@ format:
 # Shortcut to format and lint recipes
 check: format lint
 
+# Build & release ADZTBotV2, it needs GH_TOKEN to be overwritten and UNSTABLE set to unstable to publish a pre-release
+release_full $UNSTABLE="stable": build
+    #!/usr/bin/env bash
+    if [ "${UNSTABLE}" = "unstable" ]; then
+        gh release create --generate-notes --prerelease {{VERSION}} ./bin/*.zip
+    else; then
+        gh release create --generate-notes {{VERSION}} ./bin/*.zip
+    fi
+
+# Upload the release binary to an existing release, it needs GH_TOKEN to be overwritten
+release_ci: build
+    gh release upload {{VERSION}} ./bin/*.zip
+
 # Aliases
 #alias b := build
 #alias cc := cleanc
@@ -37,4 +59,6 @@ check: format lint
 #alias f := format
 #alias c := check
 
-# TODO: make a release command and update the CI
+# Local Variables:
+# mode: makefile
+# End:
