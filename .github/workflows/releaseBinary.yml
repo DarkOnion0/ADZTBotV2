@@ -13,7 +13,7 @@ env:
   GO_VERSION: 1.16.x
 
 jobs:
-  build-project:
+  build-and-release-project:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -22,38 +22,11 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: ${{ env.GO_VERSION }}
-          
-      - name: Format tag (manual trigger)
-        if: github.event_name == 'workflow_dispatch'
-        run: echo "VERSION=${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
-          
-      - name: Format tag (auto trigger)
-        if: github.event_name != 'workflow_dispatch'
-        run: |
-          # Strip git ref prefix from version
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-          
-          # Add VERSION to the action env
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-
-      - name: Build
-        run: bash build.sh ${{ env.VERSION }}
-
-      - uses: actions/upload-artifact@v2
-        with:
-          name: build
-          path: ./bin/*.zip
-
-  upload-binary:
-    runs-on: ubuntu-latest
-    needs: [build-project] 
-    env:
-      GH_REPO: ${{ github.repository }}
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v2
       
+      - uses: cachix/install-nix-action@v15
+        with:
+          nix_path: nixpkgs=channel:nixos-21.11
+          
       - name: Format tag (manual trigger)
         if: github.event_name == 'workflow_dispatch'
         run: echo "VERSION=${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
@@ -66,13 +39,6 @@ jobs:
           
           # Add VERSION to the action env
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-
-      - uses: actions/download-artifact@v2
-        with:
-          name: build
-          path: ./bin
-
-      - name: Publish binary
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload ${{ env.VERSION }} ./bin/*
+      
+      - name: Build and Publish binary
+        run: nix-shell --comand="just GH_TOKEN=${{ secrets.GITHUB_TOKEN }} VERSION={{env.VERSION}} release_ci"
