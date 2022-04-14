@@ -41,4 +41,4 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
       
       - name: Build and Publish binary
-        run: nix-shell --comand="just GH_TOKEN=${{ secrets.GITHUB_TOKEN }} VERSION={{env.VERSION}} release_ci"
+        run: nix-shell --command="just GH_TOKEN=${{ secrets.GITHUB_TOKEN }} VERSION={{env.VERSION}} release_ci"
