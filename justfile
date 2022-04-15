@@ -25,18 +25,24 @@ cleanb:
 
 # Lint the project files
 lint:
-    echo "Lint all go files"
+    @echo -e "\nLint all go files"
     golangci-lint run --verbose --fix --timeout 5m .
-    
-    echo "Check if go.mod and go.sum are up to date"
-    go mod tidy
 
 # Format all the project files
 format:
+    @echo -e "\nFormat go code"
     gofmt -w .
 
-# Shortcut to format and lint recipes
+    @echo -e "\nFormat other code with prettier (yaml, md...)"
+    prettier -w .
+
+# Check the go.mod and the go.sum files
 check: format lint
+    @echo -e "\nVerify dependencies have expected content"
+    go mod verify
+    
+    @echo -e "\nCheck if go.mod and go.sum are up to date"
+    go mod tidy
 
 # Build & release ADZTBotV2, it needs GH_TOKEN to be overwritten and UNSTABLE set to unstable to publish a pre-release
 release_full $UNSTABLE="stable": build
