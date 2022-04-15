@@ -28,11 +28,6 @@ jobs:
       - name: Check code
         run: nix-shell --command "just check"
 
-      - name: Check go.mod/go.sum
-        run: |
-          echo "check if go.mod and go.sum are up to date"
-          go mod tidy
-
       - name: Commit formatted code
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
