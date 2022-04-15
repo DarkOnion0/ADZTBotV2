@@ -17,12 +17,22 @@ pkgs.mkShell {
 
     # nativeBuildInputs is usually what you want -- tools you need to run
     nativeBuildInputs = [
+      # Go
       pkgs.go
+      pkgs.golangci-lint
+
+      # Scripting
       pkgs.zip
       pkgs.unzip
       pkgs.curl
       pkgs.jq
+      pkgs.gh
+
+      # Command runner
       pkgs.just
-      pkgs.golangci-lint
+      #pkgs.act
+
+      # Formater
+      pkgs.nodePackages.prettier
      ];
 }
