@@ -2,10 +2,10 @@ name: Container
 
 on:
   release:
-    types: [ published ]
+    types: [published]
 
   push:
-    branches: [ main ]
+    branches: [main]
 
 env:
   IMAGE_NAME: adztbotv2
@@ -45,7 +45,7 @@ jobs:
 
           # Use `latest` tag convention and add it to github env
           [ "$VERSION" == "main" ] && VERSION=latest
-          
+
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       #- name: Format user name
