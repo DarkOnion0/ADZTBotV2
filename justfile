@@ -57,6 +57,11 @@ release_full $UNSTABLE="stable": build
 release_ci: build
     gh release upload {{VERSION}} ./bin/*.zip
 
+# The command to run to dev ADZTBotV2
+dev: format lint
+    @echo -e "\nRun ADZTBotV2"
+    go run main.go -db $DB -url $URL -chanm $CHANM -chanv $CHANV -token $TOKEN -admin $ADMIN -debug $DEBUG
+
 # Aliases
 #alias b := build
 #alias cc := cleanc
