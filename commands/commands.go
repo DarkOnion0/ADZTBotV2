@@ -453,43 +453,43 @@ var (
 						Str("postId", i.ApplicationCommandData().Options[0].StringValue()).
 						Msg("An error occurred while setting the vote")
 					return
+				}
+
+				var postStatus string
+
+				// choose the correct word to send back in the message
+				if postAdded {
+					postStatus = "added"
 				} else {
+					postStatus = "updated"
+				}
 
-					var postStatus string
+				log.Info().
+					Str("userDiscordId", userDiscord.ID).
+					Str("type", "command").
+					Str("function", "vote").
+					Str("userVote", i.ApplicationCommandData().Options[1].StringValue()).
+					Str("postId", i.ApplicationCommandData().Options[0].StringValue()).
+					Str("postStatus", postStatus).
+					Msg("Post has been sent to the corresponding channel")
 
-					// choose the correct word to send back in the message
-					if postAdded {
-						postStatus = "added"
-					} else {
-						postStatus = "updated"
-					}
+				err2 := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: fmt.Sprintf("Your vote has been successfuly %s for the post `%s`", postStatus, i.ApplicationCommandData().Options[0].StringValue()),
+					},
+				})
 
-					log.Info().
+				if err2 != nil {
+					log.Error().
+						Err(err2).
 						Str("userDiscordId", userDiscord.ID).
 						Str("type", "command").
 						Str("function", "vote").
-						Str("userVote", i.ApplicationCommandData().Options[1].StringValue()).
-						Str("postId", i.ApplicationCommandData().Options[0].StringValue()).
-						Str("postStatus", postStatus).
-						Msg("Post has been sent to the corresponding channel")
-
-					err2 := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-						Type: discordgo.InteractionResponseChannelMessageWithSource,
-						Data: &discordgo.InteractionResponseData{
-							Content: fmt.Sprintf("Your vote has been successfuly %s for the post `%s`", postStatus, i.ApplicationCommandData().Options[0].StringValue()),
-						},
-					})
-
-					if err2 != nil {
-						log.Error().
-							Err(err2).
-							Str("userDiscordId", userDiscord.ID).
-							Str("type", "command").
-							Str("function", "vote").
-							Msg("An error occurred while responding to the command interaction")
-						return
-					}
+						Msg("An error occurred while responding to the command interaction")
+					return
 				}
+
 			} else {
 				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,

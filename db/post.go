@@ -3,11 +3,12 @@ package db
 import (
 	"context"
 	"errors"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/DarkOnion0/ADZTBotV2/config"
+	"github.com/DarkOnion0/ADZTBotV2/functions"
+	"github.com/DarkOnion0/ADZTBotV2/types"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -16,27 +17,6 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
-
-type postRecordSendT struct {
-	//ID       primitive.ObjectID `bson:"_id" json:"id,omitempty"`
-	Type     string
-	Url      string
-	User     primitive.ObjectID
-	VoteList []postVote
-}
-
-type PostRecordFetchT struct {
-	ID       primitive.ObjectID `bson:"_id" json:"id,omitempty"`
-	Type     string
-	Url      string
-	User     primitive.ObjectID
-	VoteList []postVote
-}
-
-type postVote struct {
-	User primitive.ObjectID
-	Vote string
-}
 
 var ErrNoDocument = errors.New("the selected post doesn't exist")
 var ErrWrongUserDbId = errors.New("the provided user db id is different from the wanted one")
@@ -60,7 +40,7 @@ func Post(userId primitive.ObjectID, postType, postUrl string) (postAlreadyExist
 	postCollection := config.Client.Database(*config.DBName).Collection("post")
 
 	// check if the post already exist in the DB according to its url
-	var postRecordFetch PostRecordFetchT
+	var postRecordFetch types.PostRecordFetchT
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -84,7 +64,7 @@ func Post(userId primitive.ObjectID, postType, postUrl string) (postAlreadyExist
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
 
-			info, _ := postCollection.InsertOne(ctx, postRecordSendT{Type: postType, Url: strings.Split(postUrl, "?si=")[0], User: userId, VoteList: []postVote{{User: userId, Vote: "+"}}})
+			info, _ := postCollection.InsertOne(ctx, types.PostRecordSendT{Type: postType, Url: strings.Split(postUrl, "?si=")[0], User: userId, VoteList: []types.PostVote{{User: userId, Vote: "+"}}})
 
 			log.Info().
 				Str("type", "module").
@@ -160,7 +140,7 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 			Str("id", postId)).
 		Msg("Fetching the post information")
 
-	var postRecordFetch PostRecordFetchT
+	var postRecordFetch types.PostRecordFetchT
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	err2 := postCollection.FindOne(ctx, bson.D{{Key: "_id", Value: postIdPrimitive}}).Decode(&postRecordFetch)
@@ -246,7 +226,7 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 			defer cancel()
 
 			_, err3 := postCollection.UpdateOne(ctx, bson.M{"_id": postIdPrimitive}, bson.D{
-				{Key: "$set", Value: bson.D{{Key: "votelist", Value: append(postRecordFetch.VoteList, postVote{User: userId, Vote: userVote})}}},
+				{Key: "$set", Value: bson.D{{Key: "votelist", Value: append(postRecordFetch.VoteList, types.PostVote{User: userId, Vote: userVote})}}},
 			})
 
 			if err3 != nil {
@@ -327,7 +307,7 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 }
 
 // GetVote function fetch and return all the information about a post according to the provided postId and userId
-func GetVote(postId string, userId primitive.ObjectID) (err error, globalVote int, userVote string, postFetch PostRecordFetchT) {
+func GetVote(postId string, userId primitive.ObjectID) (err error, globalVote int, userVote string, postFetch types.PostRecordFetchT) {
 	log.Debug().
 		Str("type", "module").
 		Str("module", "post").
@@ -409,59 +389,10 @@ func GetVote(postId string, userId primitive.ObjectID) (err error, globalVote in
 
 		err = nil
 		// count the vote score of the post
-		globalVote, userVote = CountScorePost(postFetch, userId)
+		globalVote, userVote = functions.CountScorePost(postFetch, userId)
 
 		return err, globalVote, userVote, postFetch
 	}
-}
-
-// CountScorePost function calculate the total score of a post according to the provided post (postRecord),
-// it can also return the score of a specific user on this post according to the provided db id (userDbId)
-func CountScorePost(postRecord PostRecordFetchT, userId primitive.ObjectID) (globalVote int, userVote string) {
-	userVote = "You haven't yet vote on this post 😅"
-	globalVote = 0
-
-	log.Debug().
-		Str("type", "module").
-		Str("module", "post").
-		Str("function", "countScorePost").
-		Str("userId", userId.Hex()).
-		Str("userVote", userVote).
-		Str("globalVote", strconv.Itoa(globalVote)).
-		Dict("post", zerolog.Dict().
-			Str("id", postRecord.ID.Hex())).
-		Msg("Running the function")
-
-	for i := 0; i < len(postRecord.VoteList); i++ {
-		if postRecord.VoteList[i].User == userId {
-			if postRecord.VoteList[i].Vote == "+" {
-				userVote = "Like 👍"
-				globalVote += 1
-			} else {
-				userVote = "Dislike 👎"
-				globalVote += -1
-			}
-		} else {
-			if postRecord.VoteList[i].Vote == "+" {
-				globalVote += 1
-			} else {
-				globalVote += -1
-			}
-		}
-	}
-
-	log.Info().
-		Str("type", "module").
-		Str("module", "post").
-		Str("function", "countScorePost").
-		Str("userId", userId.Hex()).
-		Str("userVote", userVote).
-		Str("globalVote", strconv.Itoa(globalVote)).
-		Dict("post", zerolog.Dict().
-			Str("id", postRecord.ID.Hex())).
-		Msg("All the score has been computed successfully")
-
-	return
 }
 
 func DeletePost(postId, userId primitive.ObjectID, isBotAdmin bool) (err error) {
@@ -477,7 +408,7 @@ func DeletePost(postId, userId primitive.ObjectID, isBotAdmin bool) (err error) 
 
 	postCollection := config.Client.Database(*config.DBName).Collection("post")
 
-	var postRecordFetch PostRecordFetchT
+	var postRecordFetch types.PostRecordFetchT
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	log.Debug().

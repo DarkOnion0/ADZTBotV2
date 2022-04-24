@@ -168,4 +168,8 @@ func main() {
 		Str("type", "main").
 		Str("function", "main").
 		Msg("Gracefully shutting down the bot...")
+
+	/*
+		Custom script
+	*/
 }

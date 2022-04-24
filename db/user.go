@@ -8,28 +8,14 @@ import (
 	"time"
 
 	"github.com/DarkOnion0/ADZTBotV2/config"
+	"github.com/DarkOnion0/ADZTBotV2/functions"
+	"github.com/DarkOnion0/ADZTBotV2/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/rs/zerolog/log"
 )
-
-// This is the datastructures of every mongodb record in the userInfo collection
-type userRecordFetch struct {
-	ID     primitive.ObjectID `bson:"_id" json:"id,omitempty"`
-	Userid string
-}
-type userRecordSend struct {
-	//ID     primitive.ObjectID `bson:"_id" json:"id,omitempty"`
-	Userid string
-}
-
-type UserInfoFetch struct {
-	ID          primitive.ObjectID `bson:"_id" json:"id,omitempty"`
-	Posts       []PostRecordFetchT
-	GlobalScore int
-}
 
 var ErrFetchingPost = errors.New("somethings bad append while fetching post")
 
@@ -47,7 +33,7 @@ func CheckUser(userDiscordId string) (err error, isUserExist bool, userId primit
 		Msg("Running the function")
 	userInfoCollection := config.Client.Database(*config.DBName).Collection("userInfo")
 
-	var userList userRecordFetch
+	var userList types.UserRecordFetch
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	log.Debug().
@@ -129,7 +115,7 @@ func RegisterUser(userDiscordId string) (err error) {
 			Str("userDiscordId", userDiscordId).
 			Bool("userStatus", userStatus).
 			Msg("Adding user to the database")
-		info, err1 := userInfoCollection.InsertOne(ctx, userRecordSend{Userid: userDiscordId})
+		info, err1 := userInfoCollection.InsertOne(ctx, types.UserRecordSend{Userid: userDiscordId})
 
 		if err1 != nil {
 			log.Error().
@@ -179,7 +165,7 @@ func GetDiscordId(userId primitive.ObjectID) (err error, userDiscordId string) {
 		Msg("Running the function")
 	userInfoCollection := config.Client.Database(*config.DBName).Collection("userInfo")
 
-	var userList userRecordFetch
+	var userList types.UserRecordFetch
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	log.Debug().
@@ -227,7 +213,7 @@ func GetDiscordId(userId primitive.ObjectID) (err error, userDiscordId string) {
 }
 
 // GetUserInfo function get and return all the user infos according to the provided mongodb _id
-func GetUserInfo(userId primitive.ObjectID) (err error, userStats UserInfoFetch) {
+func GetUserInfo(userId primitive.ObjectID) (err error, userStats types.UserInfoFetch) {
 	log.Debug().
 		Str("type", "module").
 		Str("module", "user").
@@ -239,7 +225,7 @@ func GetUserInfo(userId primitive.ObjectID) (err error, userStats UserInfoFetch)
 	postCollection := config.Client.Database(*config.DBName).Collection("post")
 
 	// Init the users stats var
-	userStats = UserInfoFetch{ID: userId}
+	userStats = types.UserInfoFetch{ID: userId}
 
 	// Query DB
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -274,7 +260,7 @@ func GetUserInfo(userId primitive.ObjectID) (err error, userStats UserInfoFetch)
 				Str("function", "getUserInfo").
 				Str("userId", userId.Hex()).
 				Msg("Something bad while fetching all the post from a user, the user has no post")
-			return ErrNoDocument, UserInfoFetch{}
+			return ErrNoDocument, types.UserInfoFetch{}
 		}
 
 		log.Error().
@@ -284,7 +270,7 @@ func GetUserInfo(userId primitive.ObjectID) (err error, userStats UserInfoFetch)
 			Str("function", "getUserInfo").
 			Str("userId", userId.Hex()).
 			Msg("Something bad while fetching all the post from a user")
-		return errors.New("an error occurred while fetching all the post from a user"), UserInfoFetch{}
+		return errors.New("an error occurred while fetching all the post from a user"), types.UserInfoFetch{}
 	}
 
 	// Get all the posts in just one array
@@ -304,12 +290,12 @@ func GetUserInfo(userId primitive.ObjectID) (err error, userStats UserInfoFetch)
 			Str("userId", userId.Hex()).
 			Msg("Something bad while fetching all the post document")
 
-		return ErrFetchingPost, UserInfoFetch{}
+		return ErrFetchingPost, types.UserInfoFetch{}
 	}
 
 	fmt.Sprintln(userStats.Posts)
 
-	// Return an error of type 3 if a user as posted anything
+	// Return an error if a user as posted anything
 	if len(userStats.Posts) == 0 {
 		log.Error().
 			Str("type", "module").
@@ -317,7 +303,7 @@ func GetUserInfo(userId primitive.ObjectID) (err error, userStats UserInfoFetch)
 			Str("function", "getUserInfo").
 			Str("userId", userId.Hex()).
 			Msg("Something bad while fetching all the post from a user, the user has no post")
-		return ErrNoPost, UserInfoFetch{}
+		return ErrNoPost, types.UserInfoFetch{}
 	}
 
 	log.Debug().
@@ -328,7 +314,7 @@ func GetUserInfo(userId primitive.ObjectID) (err error, userStats UserInfoFetch)
 		Msg("Iterating over all the fetched document to count score")
 	// iterate over all the fetched document
 	for i := 0; i < len(userStats.Posts); i++ {
-		scorePost, _ := CountScorePost(userStats.Posts[i], userId)
+		scorePost, _ := functions.CountScorePost(userStats.Posts[i], userId)
 		log.Printf("%s", strconv.Itoa(scorePost))
 		// update the score
 		userStats.GlobalScore += scorePost
