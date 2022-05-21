@@ -14,8 +14,17 @@ type UserRecordSend struct {
 	Userid string
 }
 
-type UserInfoFetch struct {
+type UserInfo struct {
 	ID          primitive.ObjectID `bson:"_id" json:"id,omitempty"`
 	Posts       []PostRecordFetchT
+	Ranking     int
 	GlobalScore int
 }
+
+type UserInfoFetch struct {
+	ID      primitive.ObjectID `bson:"_id" json:"id,omitempty"`
+	Posts   []PostRecordFetchT
+	Ranking int
+}
+
+type UserInfoList []UserInfoFetch
