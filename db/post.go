@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/DarkOnion0/ADZTBotV2/config"
-	"github.com/DarkOnion0/ADZTBotV2/functions"
 	"github.com/DarkOnion0/ADZTBotV2/types"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -29,7 +28,7 @@ var ErrWrongUserDbId = errors.New("the provided user db id is different from the
 func Post(userId primitive.ObjectID, postType, postUrl string) (postAlreadyExist bool, postId string) {
 	log.Debug().
 		Str("type", "module").
-		Str("module", "post").
+		Str("module", "db").
 		Str("function", "post").
 		Str("userId", userId.Hex()).
 		Dict("post", zerolog.Dict().
@@ -46,7 +45,7 @@ func Post(userId primitive.ObjectID, postType, postUrl string) (postAlreadyExist
 
 	log.Debug().
 		Str("type", "module").
-		Str("module", "post").
+		Str("module", "db").
 		Str("function", "post").
 		Str("userId", userId.Hex()).
 		Dict("post", zerolog.Dict().
@@ -68,7 +67,7 @@ func Post(userId primitive.ObjectID, postType, postUrl string) (postAlreadyExist
 
 			log.Info().
 				Str("type", "module").
-				Str("module", "post").
+				Str("module", "db").
 				Str("function", "post").
 				Str("userId", userId.Hex()).
 				Dict("post", zerolog.Dict().
@@ -83,7 +82,7 @@ func Post(userId primitive.ObjectID, postType, postUrl string) (postAlreadyExist
 		log.Error().
 			Err(err1).
 			Str("type", "module").
-			Str("module", "post").
+			Str("module", "db").
 			Str("function", "post").
 			Str("userId", userId.Hex()).
 			Dict("post", zerolog.Dict().
@@ -104,7 +103,7 @@ func Post(userId primitive.ObjectID, postType, postUrl string) (postAlreadyExist
 func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 	log.Debug().
 		Str("type", "module").
-		Str("module", "post").
+		Str("module", "db").
 		Str("function", "setVote").
 		Str("userId", userId.Hex()).
 		Str("userVote", userVote).
@@ -119,7 +118,7 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 		log.Error().
 			Err(err1).
 			Str("type", "module").
-			Str("module", "post").
+			Str("module", "db").
 			Str("function", "setVote").
 			Str("userId", userId.Hex()).
 			Str("userVote", userVote).
@@ -132,7 +131,7 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 
 	log.Debug().
 		Str("type", "module").
-		Str("module", "post").
+		Str("module", "db").
 		Str("function", "setVote").
 		Str("userId", userId.Hex()).
 		Str("userVote", userVote).
@@ -152,7 +151,7 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 			log.Error().
 				Err(err2).
 				Str("type", "module").
-				Str("module", "post").
+				Str("module", "db").
 				Str("function", "setVote").
 				Str("userId", userId.Hex()).
 				Str("userVote", userVote).
@@ -166,7 +165,7 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 		log.Error().
 			Err(err2).
 			Str("type", "module").
-			Str("module", "post").
+			Str("module", "db").
 			Str("function", "setVote").
 			Str("userId", userId.Hex()).
 			Str("userVote", userVote).
@@ -180,7 +179,7 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 
 		log.Debug().
 			Str("type", "module").
-			Str("module", "post").
+			Str("module", "db").
 			Str("function", "setVote").
 			Str("userId", userId.Hex()).
 			Str("userVote", userVote).
@@ -195,7 +194,7 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 
 				log.Debug().
 					Str("type", "module").
-					Str("module", "post").
+					Str("module", "db").
 					Str("function", "setVote").
 					Str("userId", userId.Hex()).
 					Str("userVote", userVote).
@@ -212,7 +211,7 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 		if !alreadyVote {
 			log.Debug().
 				Str("type", "module").
-				Str("module", "post").
+				Str("module", "db").
 				Str("function", "setVote").
 				Str("userId", userId.Hex()).
 				Str("userVote", userVote).
@@ -233,7 +232,7 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 				log.Error().
 					Err(err3).
 					Str("type", "module").
-					Str("module", "post").
+					Str("module", "db").
 					Str("function", "setVote").
 					Str("userId", userId.Hex()).
 					Str("userVote", userVote).
@@ -246,7 +245,7 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 
 			log.Info().
 				Str("type", "module").
-				Str("module", "post").
+				Str("module", "db").
 				Str("function", "setVote").
 				Str("userId", userId.Hex()).
 				Str("userVote", userVote).
@@ -259,7 +258,7 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 		} else {
 			log.Debug().
 				Str("type", "module").
-				Str("module", "post").
+				Str("module", "db").
 				Str("function", "setVote").
 				Str("userId", userId.Hex()).
 				Str("userVote", userVote).
@@ -279,7 +278,7 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 				log.Error().
 					Err(err3).
 					Str("type", "module").
-					Str("module", "post").
+					Str("module", "db").
 					Str("function", "setVote").
 					Str("userId", userId.Hex()).
 					Str("userVote", userVote).
@@ -292,7 +291,7 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 
 			log.Info().
 				Str("type", "module").
-				Str("module", "post").
+				Str("module", "db").
 				Str("function", "setVote").
 				Str("userId", userId.Hex()).
 				Str("userVote", userVote).
@@ -310,7 +309,7 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 func GetVote(postId string, userId primitive.ObjectID) (err error, globalVote int, userVote string, postFetch types.PostRecordFetchT) {
 	log.Debug().
 		Str("type", "module").
-		Str("module", "post").
+		Str("module", "db").
 		Str("function", "getVote").
 		Str("userId", userId.Hex()).
 		Dict("post", zerolog.Dict().
@@ -324,7 +323,7 @@ func GetVote(postId string, userId primitive.ObjectID) (err error, globalVote in
 		log.Error().
 			Err(err1).
 			Str("type", "module").
-			Str("module", "post").
+			Str("module", "db").
 			Str("function", "getVote").
 			Str("userId", userId.Hex()).
 			Dict("post", zerolog.Dict().
@@ -339,7 +338,7 @@ func GetVote(postId string, userId primitive.ObjectID) (err error, globalVote in
 	defer cancel()
 	log.Debug().
 		Str("type", "module").
-		Str("module", "post").
+		Str("module", "db").
 		Str("function", "getVote").
 		Str("userId", userId.Hex()).
 		Dict("post", zerolog.Dict().
@@ -352,7 +351,7 @@ func GetVote(postId string, userId primitive.ObjectID) (err error, globalVote in
 			log.Error().
 				Err(err2).
 				Str("type", "module").
-				Str("module", "post").
+				Str("module", "db").
 				Str("function", "getVote").
 				Str("userId", userId.Hex()).
 				Str("userVote", userVote).
@@ -366,7 +365,7 @@ func GetVote(postId string, userId primitive.ObjectID) (err error, globalVote in
 		log.Error().
 			Err(err2).
 			Str("type", "module").
-			Str("module", "post").
+			Str("module", "db").
 			Str("function", "getVote").
 			Str("userId", userId.Hex()).
 			Str("userVote", userVote).
@@ -379,7 +378,7 @@ func GetVote(postId string, userId primitive.ObjectID) (err error, globalVote in
 	} else {
 		log.Info().
 			Str("type", "module").
-			Str("module", "post").
+			Str("module", "db").
 			Str("function", "getVote").
 			Str("userId", userId.Hex()).
 			Str("userVote", userVote).
@@ -389,7 +388,7 @@ func GetVote(postId string, userId primitive.ObjectID) (err error, globalVote in
 
 		err = nil
 		// count the vote score of the post
-		globalVote, userVote = functions.CountScorePost(postFetch, userId)
+		globalVote, userVote = CountScorePost(postFetch, userId)
 
 		return err, globalVote, userVote, postFetch
 	}
@@ -398,7 +397,7 @@ func GetVote(postId string, userId primitive.ObjectID) (err error, globalVote in
 func DeletePost(postId, userId primitive.ObjectID, isBotAdmin bool) (err error) {
 	log.Debug().
 		Str("type", "module").
-		Str("module", "post").
+		Str("module", "db").
 		Str("function", "deletePost").
 		Str("userId", userId.Hex()).
 		Bool("isBotAdmin", isBotAdmin).
@@ -413,7 +412,7 @@ func DeletePost(postId, userId primitive.ObjectID, isBotAdmin bool) (err error) 
 	defer cancel()
 	log.Debug().
 		Str("type", "module").
-		Str("module", "post").
+		Str("module", "db").
 		Str("function", "deletePost").
 		Str("userId", userId.Hex()).
 		Bool("isBotAdmin", isBotAdmin).
@@ -427,7 +426,7 @@ func DeletePost(postId, userId primitive.ObjectID, isBotAdmin bool) (err error) 
 			log.Error().
 				Err(err1).
 				Str("type", "module").
-				Str("module", "post").
+				Str("module", "db").
 				Str("function", "deletePost").
 				Str("userId", userId.Hex()).
 				Bool("isBotAdmin", isBotAdmin).
@@ -441,7 +440,7 @@ func DeletePost(postId, userId primitive.ObjectID, isBotAdmin bool) (err error) 
 		log.Error().
 			Err(err1).
 			Str("type", "module").
-			Str("module", "post").
+			Str("module", "db").
 			Str("function", "deletePost").
 			Str("userId", userId.Hex()).
 			Bool("isBotAdmin", isBotAdmin).
@@ -455,7 +454,7 @@ func DeletePost(postId, userId primitive.ObjectID, isBotAdmin bool) (err error) 
 	if postRecordFetch.User == userId || isBotAdmin {
 		log.Debug().
 			Str("type", "module").
-			Str("module", "post").
+			Str("module", "db").
 			Str("function", "deletePost").
 			Str("userId", userId.Hex()).
 			Bool("isBotAdmin", isBotAdmin).
@@ -471,7 +470,7 @@ func DeletePost(postId, userId primitive.ObjectID, isBotAdmin bool) (err error) 
 			log.Error().
 				Err(err2).
 				Str("type", "module").
-				Str("module", "post").
+				Str("module", "db").
 				Str("function", "deletePost").
 				Str("userId", userId.Hex()).
 				Bool("isBotAdmin", isBotAdmin).
@@ -484,7 +483,7 @@ func DeletePost(postId, userId primitive.ObjectID, isBotAdmin bool) (err error) 
 
 		log.Info().
 			Str("type", "module").
-			Str("module", "post").
+			Str("module", "db").
 			Str("function", "deletePost").
 			Str("userId", userId.Hex()).
 			Bool("isBotAdmin", isBotAdmin).
@@ -497,13 +496,13 @@ func DeletePost(postId, userId primitive.ObjectID, isBotAdmin bool) (err error) 
 
 	log.Error().
 		Str("type", "module").
-		Str("module", "post").
+		Str("module", "db").
 		Str("function", "deletePost").
 		Str("userId", userId.Hex()).
 		Bool("isBotAdmin", isBotAdmin).
 		Dict("post", zerolog.Dict().
 			Str("id", postId.Hex())).
-		Msg("The provided user doesnt match the author id and is not a bot admin")
+		Msg("The provided user doesn't match the author id and is not a bot admin")
 
 	return ErrWrongUserDbId
 }
