@@ -1,4 +1,4 @@
-package functions
+package db
 
 import (
 	"strconv"
@@ -18,7 +18,7 @@ func CountScorePost(postRecord types.PostRecordFetchT, userId primitive.ObjectID
 
 	log.Debug().
 		Str("type", "module").
-		Str("module", "post").
+		Str("module", "db").
 		Str("function", "countScorePost").
 		Str("userId", userId.Hex()).
 		Str("userVote", userVote).
