@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/DarkOnion0/ADZTBotV2/config"
-	"github.com/DarkOnion0/ADZTBotV2/functions"
 	"github.com/DarkOnion0/ADZTBotV2/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -27,7 +26,7 @@ var ErrUserAlreadyRegistered = errors.New("the selected user is already register
 func CheckUser(userDiscordId string) (err error, isUserExist bool, userId primitive.ObjectID) {
 	log.Debug().
 		Str("type", "module").
-		Str("module", "user").
+		Str("module", "db").
 		Str("function", "checkUser").
 		Str("userDiscordId", userDiscordId).
 		Msg("Running the function")
@@ -38,7 +37,7 @@ func CheckUser(userDiscordId string) (err error, isUserExist bool, userId primit
 	defer cancel()
 	log.Debug().
 		Str("type", "module").
-		Str("module", "user").
+		Str("module", "db").
 		Str("function", "checkUser").
 		Str("userDiscordId", userDiscordId).
 		Msg("Fetching the user information")
@@ -48,7 +47,7 @@ func CheckUser(userDiscordId string) (err error, isUserExist bool, userId primit
 		log.Error().
 			Err(err1).
 			Str("type", "module").
-			Str("module", "user").
+			Str("module", "db").
 			Str("function", "checkUser").
 			Str("userDiscordId", userDiscordId).
 			Msg("Something bad append while finding the user in the database")
@@ -61,7 +60,7 @@ func CheckUser(userDiscordId string) (err error, isUserExist bool, userId primit
 	if len(userList.Userid) == 0 {
 		log.Info().
 			Str("type", "module").
-			Str("module", "user").
+			Str("module", "db").
 			Str("function", "checkUser").
 			Str("userDiscordId", userDiscordId).
 			Msg("User doesn't exist in the database")
@@ -69,7 +68,7 @@ func CheckUser(userDiscordId string) (err error, isUserExist bool, userId primit
 	} else {
 		log.Info().
 			Str("type", "module").
-			Str("module", "user").
+			Str("module", "db").
 			Str("function", "checkUser").
 			Str("userDiscordId", userDiscordId).
 			Str("userDiscordId", userList.ID.Hex()).
@@ -82,7 +81,7 @@ func CheckUser(userDiscordId string) (err error, isUserExist bool, userId primit
 func RegisterUser(userDiscordId string) (err error) {
 	log.Debug().
 		Str("type", "module").
-		Str("module", "user").
+		Str("module", "db").
 		Str("function", "registerUser").
 		Str("userDiscordId", userDiscordId).
 		Msg("Running the function")
@@ -93,7 +92,7 @@ func RegisterUser(userDiscordId string) (err error) {
 		log.Error().
 			Err(errCheckUser).
 			Str("type", "module").
-			Str("module", "user").
+			Str("module", "db").
 			Str("function", "registerUser").
 			Str("userDiscordId", userDiscordId).
 			Bool("userStatus", userStatus).
@@ -110,7 +109,7 @@ func RegisterUser(userDiscordId string) (err error) {
 
 		log.Debug().
 			Str("type", "module").
-			Str("module", "user").
+			Str("module", "db").
 			Str("function", "registerUser").
 			Str("userDiscordId", userDiscordId).
 			Bool("userStatus", userStatus).
@@ -121,7 +120,7 @@ func RegisterUser(userDiscordId string) (err error) {
 			log.Error().
 				Err(err1).
 				Str("type", "module").
-				Str("module", "user").
+				Str("module", "db").
 				Str("function", "registerUser").
 				Str("userDiscordId", userDiscordId).
 				Bool("userStatus", userStatus).
@@ -132,7 +131,7 @@ func RegisterUser(userDiscordId string) (err error) {
 
 		log.Info().
 			Str("type", "module").
-			Str("module", "user").
+			Str("module", "db").
 			Str("function", "registerUser").
 			Str("userDiscordId", userDiscordId).
 			Str("userId", info.InsertedID.(primitive.ObjectID).Hex()).
@@ -144,7 +143,7 @@ func RegisterUser(userDiscordId string) (err error) {
 
 	log.Info().
 		Str("type", "module").
-		Str("module", "user").
+		Str("module", "db").
 		Str("function", "registerUser").
 		Str("userDiscordId", userDiscordId).
 		Str("userId", userId.Hex()).
@@ -159,7 +158,7 @@ func RegisterUser(userDiscordId string) (err error) {
 func GetDiscordId(userId primitive.ObjectID) (err error, userDiscordId string) {
 	log.Debug().
 		Str("type", "module").
-		Str("module", "user").
+		Str("module", "db").
 		Str("function", "getDiscordId").
 		Str("userId", userId.Hex()).
 		Msg("Running the function")
@@ -170,7 +169,7 @@ func GetDiscordId(userId primitive.ObjectID) (err error, userDiscordId string) {
 	defer cancel()
 	log.Debug().
 		Str("type", "module").
-		Str("module", "user").
+		Str("module", "db").
 		Str("function", "getDiscordId").
 		Str("userDiscordId", userDiscordId).
 		Msg("Fetching user id from the db")
@@ -183,17 +182,17 @@ func GetDiscordId(userId primitive.ObjectID) (err error, userDiscordId string) {
 			log.Error().
 				Err(err1).
 				Str("type", "module").
-				Str("module", "user").
+				Str("module", "db").
 				Str("function", "getDiscordId").
 				Str("userDiscordId", userDiscordId).
 				Msg("Something bad append while fetching the user id from the db, suer doesn't exist")
 
-			return errors.New("user doesnt exists in the database"), ""
+			return errors.New("user doesn't exists in the database"), ""
 		}
 		log.Error().
 			Err(err1).
 			Str("type", "module").
-			Str("module", "user").
+			Str("module", "db").
 			Str("function", "getDiscordId").
 			Str("userDiscordId", userDiscordId).
 			Msg("Something bad append while fetching the user id from the db")
@@ -203,7 +202,7 @@ func GetDiscordId(userId primitive.ObjectID) (err error, userDiscordId string) {
 
 	log.Info().
 		Str("type", "module").
-		Str("module", "user").
+		Str("module", "db").
 		Str("function", "getDiscordId").
 		Str("userDiscordId", userDiscordId).
 		Str("userId", userList.ID.Hex()).
@@ -213,10 +212,10 @@ func GetDiscordId(userId primitive.ObjectID) (err error, userDiscordId string) {
 }
 
 // GetUserInfo function get and return all the user infos according to the provided mongodb _id
-func GetUserInfo(userId primitive.ObjectID) (err error, userStats types.UserInfoFetch) {
+func GetUserInfo(userId primitive.ObjectID) (err error, userStats types.UserInfo) {
 	log.Debug().
 		Str("type", "module").
-		Str("module", "user").
+		Str("module", "db").
 		Str("function", "getUserInfo").
 		Str("userId", userId.Hex()).
 		Msg("Running the function")
@@ -225,14 +224,14 @@ func GetUserInfo(userId primitive.ObjectID) (err error, userStats types.UserInfo
 	postCollection := config.Client.Database(*config.DBName).Collection("post")
 
 	// Init the users stats var
-	userStats = types.UserInfoFetch{ID: userId}
+	userStats = types.UserInfo{ID: userId}
 
 	// Query DB
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	log.Debug().
 		Str("type", "module").
-		Str("module", "user").
+		Str("module", "db").
 		Str("function", "getUserInfo").
 		Str("userId", userId.Hex()).
 		Msg("Fetching all the post from a user")
@@ -243,7 +242,7 @@ func GetUserInfo(userId primitive.ObjectID) (err error, userStats types.UserInfo
 			log.Error().
 				Err(err).
 				Str("type", "module").
-				Str("module", "user").
+				Str("module", "db").
 				Str("function", "getUserInfo").
 				Str("userId", userId.Hex()).
 				Msg("Something bad append while closing the cursor")
@@ -256,27 +255,27 @@ func GetUserInfo(userId primitive.ObjectID) (err error, userStats types.UserInfo
 			log.Error().
 				Err(err1).
 				Str("type", "module").
-				Str("module", "user").
+				Str("module", "db").
 				Str("function", "getUserInfo").
 				Str("userId", userId.Hex()).
 				Msg("Something bad while fetching all the post from a user, the user has no post")
-			return ErrNoDocument, types.UserInfoFetch{}
+			return ErrNoDocument, types.UserInfo{}
 		}
 
 		log.Error().
 			Err(err1).
 			Str("type", "module").
-			Str("module", "user").
+			Str("module", "db").
 			Str("function", "getUserInfo").
 			Str("userId", userId.Hex()).
 			Msg("Something bad while fetching all the post from a user")
-		return errors.New("an error occurred while fetching all the post from a user"), types.UserInfoFetch{}
+		return errors.New("an error occurred while fetching all the post from a user"), types.UserInfo{}
 	}
 
 	// Get all the posts in just one array
 	log.Debug().
 		Str("type", "module").
-		Str("module", "user").
+		Str("module", "db").
 		Str("function", "getUserInfo").
 		Str("userId", userId.Hex()).
 		Msg("Fetching all the post from the cursor")
@@ -285,12 +284,12 @@ func GetUserInfo(userId primitive.ObjectID) (err error, userStats types.UserInfo
 		log.Error().
 			Err(err2).
 			Str("type", "module").
-			Str("module", "user").
+			Str("module", "db").
 			Str("function", "getUserInfo").
 			Str("userId", userId.Hex()).
 			Msg("Something bad while fetching all the post document")
 
-		return ErrFetchingPost, types.UserInfoFetch{}
+		return ErrFetchingPost, types.UserInfo{}
 	}
 
 	fmt.Sprintln(userStats.Posts)
@@ -299,22 +298,22 @@ func GetUserInfo(userId primitive.ObjectID) (err error, userStats types.UserInfo
 	if len(userStats.Posts) == 0 {
 		log.Error().
 			Str("type", "module").
-			Str("module", "user").
+			Str("module", "db").
 			Str("function", "getUserInfo").
 			Str("userId", userId.Hex()).
 			Msg("Something bad while fetching all the post from a user, the user has no post")
-		return ErrNoPost, types.UserInfoFetch{}
+		return ErrNoPost, types.UserInfo{}
 	}
 
 	log.Debug().
 		Str("type", "module").
-		Str("module", "user").
+		Str("module", "db").
 		Str("function", "getUserInfo").
 		Str("userId", userId.Hex()).
 		Msg("Iterating over all the fetched document to count score")
 	// iterate over all the fetched document
 	for i := 0; i < len(userStats.Posts); i++ {
-		scorePost, _ := functions.CountScorePost(userStats.Posts[i], userId)
+		scorePost, _ := CountScorePost(userStats.Posts[i], userId)
 		log.Printf("%s", strconv.Itoa(scorePost))
 		// update the score
 		userStats.GlobalScore += scorePost
@@ -323,11 +322,126 @@ func GetUserInfo(userId primitive.ObjectID) (err error, userStats types.UserInfo
 
 	log.Info().
 		Str("type", "module").
-		Str("module", "user").
+		Str("module", "db").
 		Str("function", "getUserInfo").
 		Str("userId", userId.Hex()).
 		Int("globalScore", userStats.GlobalScore).
 		Msg("Getting user info succeed!")
 
 	return err, userStats
+}
+
+func FetchAllUsers() (err error, userStatsList []types.UserInfo) {
+	log.Debug().
+		Str("type", "module").
+		Str("module", "db").
+		Str("function", "fetchAllUsers").
+		Msg("Running the function")
+
+	// init the mongodb collection
+	userCollection := config.Client.Database(*config.DBName).Collection("userInfo")
+
+	var userList types.UserInfoList
+
+	// Query DB
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	log.Debug().
+		Str("type", "module").
+		Str("module", "db").
+		Str("function", "fetchAllUsers").
+		Msg("Fetching all the registered users")
+	cursor, err1 := userCollection.Find(ctx, bson.D{})
+	defer func(cursor *mongo.Cursor, ctx context.Context) {
+		err := cursor.Close(ctx)
+		if err != nil {
+			log.Error().
+				Err(err).
+				Str("type", "module").
+				Str("module", "db").
+				Str("function", "fetchAllUsers").
+				Msg("Something bad append while closing the cursor")
+			return
+		}
+	}(cursor, ctx)
+
+	if err1 != nil {
+		if err1 == mongo.ErrNoDocuments {
+			log.Error().
+				Err(err1).
+				Str("type", "module").
+				Str("module", "db").
+				Str("function", "fetchAllUsers").
+				Msg("Something bad while fetching all registered users, there is no user in the db")
+			return
+		}
+
+		log.Error().
+			Err(err1).
+			Str("type", "module").
+			Str("module", "db").
+			Str("function", "fetchAllUsers").
+			Msg("Something bad while fetching all the post from a user")
+		return errors.New("an error occurred while fetching all the registered users"), userStatsList
+	}
+
+	// Get all the users in just one array
+	log.Debug().
+		Str("type", "module").
+		Str("module", "db").
+		Str("function", "fetchAllUsers").
+		Msg("Fetching all the post from the cursor")
+	err2 := cursor.All(ctx, &userList)
+	if err2 != nil {
+		log.Error().
+			Err(err2).
+			Str("type", "module").
+			Str("module", "db").
+			Str("function", "fetchAllUsers").
+			Msg("Something bad while fetching all the user document")
+
+		return ErrFetchingPost, userStatsList
+	}
+
+	// Return an error if a user as posted anything
+	if len(userList) == 0 {
+		log.Error().
+			Str("type", "module").
+			Str("module", "db").
+			Str("function", "fetchAllUsers").
+			Msg("Something bad while fetching all the user, the db has no member registered")
+		return ErrNoPost, userStatsList
+	}
+
+	log.Debug().
+		Str("type", "module").
+		Str("module", "db").
+		Str("function", "fetchAllUsers").
+		Msg("Iterating over all the fetched document to get all the information for each user")
+
+	// iterate over all the fetched document
+	for i := 0; i < len(userList); i++ {
+		err1, userStats := GetUserInfo(userList[i].ID)
+
+		if err1 != nil {
+			log.Error().
+				Err(err1).
+				Str("type", "module").
+				Str("module", "db").
+				Str("function", "fetchAllUsers").
+				Msg("Something bad append while fetching user info")
+
+			return
+		}
+
+		userStatsList = append(userStatsList, userStats)
+	}
+
+	log.Info().
+		Str("type", "module").
+		Str("module", "db").
+		Str("function", "fetchAllUsers").
+		Msg("Getting user info succeed!")
+
+	return
 }
