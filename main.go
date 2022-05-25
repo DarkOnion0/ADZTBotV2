@@ -8,6 +8,7 @@ import (
 
 	"github.com/DarkOnion0/ADZTBotV2/commands"
 	"github.com/DarkOnion0/ADZTBotV2/config"
+	"github.com/DarkOnion0/ADZTBotV2/functions"
 	"github.com/rs/zerolog"
 
 	"github.com/bwmarrin/discordgo"
@@ -110,12 +111,38 @@ func main() {
 				Err(err).
 				Str("type", "main").
 				Str("function", "main").
-				Msg("An error occured whle closing the bot")
+				Msg("An error occurred while closing the bot")
 		}
 	}(config.Client)
 
 	/*
-		Discordgo initialisation
+		Custom script
+	*/
+
+	log.Debug().
+		Str("type", "main").
+		Str("function", "main").
+		Msg("Updating global user ranking")
+
+	err1 := functions.UpdateUserRanking()
+
+	if err1 != nil {
+		log.Fatal().
+			Err(err1).
+			Str("type", "main").
+			Str("function", "main").
+			Msg("An error occurred while closing the bot")
+
+		return
+	}
+
+	log.Info().
+		Str("type", "main").
+		Str("function", "main").
+		Msg("User ranking update successfully")
+
+	/*
+		Discordgo initialization
 	*/
 
 	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
@@ -157,7 +184,7 @@ func main() {
 				Err(err).
 				Str("type", "main").
 				Str("function", "main").
-				Msg("An error occured whle closing the bot")
+				Msg("An error occurred while closing the bot")
 		}
 	}(s)
 
@@ -168,8 +195,4 @@ func main() {
 		Str("type", "main").
 		Str("function", "main").
 		Msg("Gracefully shutting down the bot...")
-
-	/*
-		Custom script
-	*/
 }
