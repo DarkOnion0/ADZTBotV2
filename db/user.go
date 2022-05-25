@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -54,8 +53,6 @@ func CheckUser(userDiscordId string) (err error, isUserExist bool, userId primit
 
 		return errors.New("something bad append while finding the user in the database"), isUserExist, userList.ID
 	}
-
-	//fmt.Println(userList.Userid, userDiscordId)
 
 	if len(userList.Userid) == 0 {
 		log.Info().
@@ -175,8 +172,6 @@ func GetDiscordId(userId primitive.ObjectID) (err error, userDiscordId string) {
 		Msg("Fetching user id from the db")
 	err1 := userInfoCollection.FindOne(ctx, bson.D{{Key: "_id", Value: userId}}).Decode(&userList)
 
-	//fmt.Println(userList.Userid, userDiscordId)
-
 	if err1 != nil {
 		if err1 == mongo.ErrNoDocuments {
 			log.Error().
@@ -220,11 +215,11 @@ func GetUserInfo(userId primitive.ObjectID) (err error, userStats types.UserInfo
 		Str("userId", userId.Hex()).
 		Msg("Running the function")
 
-	// init the mongodb collection
+	// Init the mongodb collection
 	postCollection := config.Client.Database(*config.DBName).Collection("post")
 
 	// Init the users stats var
-	userStats = types.UserInfo{ID: userId}
+	userStats.ID = userId
 
 	// Query DB
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -292,8 +287,6 @@ func GetUserInfo(userId primitive.ObjectID) (err error, userStats types.UserInfo
 		return ErrFetchingPost, types.UserInfo{}
 	}
 
-	fmt.Sprintln(userStats.Posts)
-
 	// Return an error if a user as posted anything
 	if len(userStats.Posts) == 0 {
 		log.Error().
@@ -331,6 +324,7 @@ func GetUserInfo(userId primitive.ObjectID) (err error, userStats types.UserInfo
 	return err, userStats
 }
 
+// Fetch all the users infos of the database and return them as list
 func FetchAllUsers() (err error, userStatsList []types.UserInfo) {
 	log.Debug().
 		Str("type", "module").
@@ -419,22 +413,32 @@ func FetchAllUsers() (err error, userStatsList []types.UserInfo) {
 		Str("function", "fetchAllUsers").
 		Msg("Iterating over all the fetched document to get all the information for each user")
 
-	// iterate over all the fetched document
+	// iterate over all the fetched users and append their infos in a list
 	for i := 0; i < len(userList); i++ {
 		err1, userStats := GetUserInfo(userList[i].ID)
 
 		if err1 != nil {
-			log.Error().
-				Err(err1).
-				Str("type", "module").
-				Str("module", "db").
-				Str("function", "fetchAllUsers").
-				Msg("Something bad append while fetching user info")
+			switch err1 {
+			case ErrNoPost:
+				log.Error().
+					Err(err1).
+					Str("type", "module").
+					Str("module", "db").
+					Str("function", "fetchAllUsers").
+					Msg("Something bad append, user has no post")
+			default:
+				log.Error().
+					Err(err1).
+					Str("type", "module").
+					Str("module", "db").
+					Str("function", "fetchAllUsers").
+					Msg("Something bad append while fetching user info")
 
-			return
+				return errors.New("something bad append while fetching user info"), userStatsList
+			}
+		} else {
+			userStatsList = append(userStatsList, userStats)
 		}
-
-		userStatsList = append(userStatsList, userStats)
 	}
 
 	log.Info().
@@ -442,6 +446,68 @@ func FetchAllUsers() (err error, userStatsList []types.UserInfo) {
 		Str("module", "db").
 		Str("function", "fetchAllUsers").
 		Msg("Getting user info succeed!")
+
+	return
+}
+
+// Update a user info field according to the provided userId (to scope the research), the dbKey as the key to modify and the dbValue as the new value to set
+func UpdateUser(userId primitive.ObjectID, dbKey string, dbValue interface{}) (err error) {
+	log.Debug().
+		Str("type", "module").
+		Str("module", "db").
+		Str("function", "updateUser").
+		Str("userId", userId.Hex()).
+		Str("dbKey", dbKey).
+		Interface("dbValue", dbValue).
+		Msg("Running the function")
+
+	log.Debug().
+		Str("type", "module").
+		Str("module", "db").
+		Str("function", "updateUser").
+		Str("userId", userId.Hex()).
+		Str("dbKey", dbKey).
+		Interface("dbValue", dbValue).
+		Msg("Fetching the database")
+	userCollection := config.Client.Database(*config.DBName).Collection("userInfo")
+
+	// update the user info
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	log.Debug().
+		Str("type", "module").
+		Str("module", "db").
+		Str("function", "updateUser").
+		Str("userId", userId.Hex()).
+		Str("dbKey", dbKey).
+		Interface("dbValue", dbValue).
+		Msg("Updating the user info")
+	_, err3 := userCollection.UpdateOne(ctx, bson.M{"_id": userId}, bson.D{
+		{Key: "$set", Value: bson.D{{Key: dbKey, Value: dbValue}}},
+	})
+
+	if err3 != nil {
+		log.Error().
+			Err(err3).
+			Str("type", "module").
+			Str("module", "db").
+			Str("function", "updateUser").
+			Str("userId", userId.Hex()).
+			Str("dbKey", dbKey).
+			Interface("dbValue", dbValue).
+			Msg("Something bad append while updating the user info")
+
+		return errors.New("an error append while updating the user info")
+	}
+
+	log.Info().
+		Str("type", "module").
+		Str("module", "db").
+		Str("function", "updateUser").
+		Str("userId", userId.Hex()).
+		Str("dbKey", dbKey).
+		Interface("dbValue", dbValue).
+		Msg("The user info has been successfully updated")
 
 	return
 }
