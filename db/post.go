@@ -144,8 +144,6 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 	defer cancel()
 	err2 := postCollection.FindOne(ctx, bson.D{{Key: "_id", Value: postIdPrimitive}}).Decode(&postRecordFetch)
 
-	//fmt.Println(err2, strings.Split(postUrl, "?si=")[0])
-
 	if err2 != nil {
 		if err2 == mongo.ErrNoDocuments {
 			log.Error().
