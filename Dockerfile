@@ -25,5 +25,6 @@ ENV CHANV none
 ENV TOKEN none
 ENV ADMIN 0
 ENV DEBUG false
+ENV CRON "59 23 * * *"
 
-CMD ["sh", "-c", "./ADZTBotV2 -db $DB -url $URL -chanm $CHANM -chanv $CHANV -token $TOKEN -admin $ADMIN -debug $DEBUG"]
+CMD ["sh", "-c", "./ADZTBotV2 -db $DB -url $URL -chanm $CHANM -chanv $CHANV -token $TOKEN -admin $ADMIN -debug $DEBUG -cron $CRON"]
