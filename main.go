@@ -9,6 +9,7 @@ import (
 	"github.com/DarkOnion0/ADZTBotV2/commands"
 	"github.com/DarkOnion0/ADZTBotV2/config"
 	"github.com/DarkOnion0/ADZTBotV2/functions"
+	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog"
 
 	"github.com/bwmarrin/discordgo"
@@ -31,6 +32,10 @@ func init() {
 
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	log.Logger = log.With().Caller().Logger()
+	// activate the pretty logger for dev purpose only if the debug mode is enabled
+	if *config.Debug == "true" {
+		log.Logger = log.With().Caller().Logger().Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	}
 
 	log.Info().
 		Str("type", "main").
@@ -124,6 +129,7 @@ func main() {
 		Str("function", "main").
 		Msg("Updating global user ranking")
 
+	// update the user ranking
 	err1 := functions.UpdateUserRanking()
 
 	if err1 != nil {
@@ -140,6 +146,22 @@ func main() {
 		Str("type", "main").
 		Str("function", "main").
 		Msg("User ranking update successfully")
+
+	/*
+		Cron job(s)
+	*/
+	c := cron.New()
+
+	// set a cron job to update the user ranking every night at 23:59
+	// nolint
+	c.AddFunc(*config.Cron, functions.UpdateUserRankingCron)
+
+	// start all the cron jobs
+	c.Start()
+
+	defer func(c *cron.Cron) {
+		c.Stop()
+	}(c)
 
 	/*
 		Discordgo initialization
