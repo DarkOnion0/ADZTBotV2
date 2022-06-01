@@ -73,9 +73,14 @@ func UpdateUserRanking() (err error) {
 		Str("function", "updateUserRanking").
 		Msg("Finished updating the users rank successfully")
 
-	// TODO run the function UpdateUserRanking every night at 00:00 am
 	// TODO display the user ranking in the stats command
 	// TODO make a special command to see the top 3 / 10 of the server
+	// TODO document new codes since 113fed51d0715ee5fd650b10b30baa97760a43c5
 
 	return
+}
+
+// This function is used to warp the UpdateUserRanking function into a cron job
+func UpdateUserRankingCron() {
+	_ = UpdateUserRanking()
 }
