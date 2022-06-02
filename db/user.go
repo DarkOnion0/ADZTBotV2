@@ -215,13 +215,33 @@ func GetUserInfo(userId primitive.ObjectID) (err error, userStats types.UserInfo
 		Str("userId", userId.Hex()).
 		Msg("Running the function")
 
-	// Init the mongodb collection
+	// Init the mongodb collections
 	postCollection := config.Client.Database(*config.DBName).Collection("post")
-
-	// Init the users stats var
-	userStats.ID = userId
+	userCollection := config.Client.Database(*config.DBName).Collection("userInfo")
 
 	// Query DB
+	ctx0, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	log.Debug().
+		Str("type", "module").
+		Str("module", "db").
+		Str("function", "getUserInfo").
+		Str("userId", userId.Hex()).
+		Msg("Fetching the user info")
+
+	err0 := userCollection.FindOne(ctx0, bson.D{{Key: "_id", Value: userId}}).Decode(&userStats)
+
+	if err0 != nil {
+		log.Error().
+			Err(err0).
+			Str("type", "module").
+			Str("module", "db").
+			Str("function", "getUserInfo").
+			Str("userId", userId.Hex()).
+			Msg("Something bad append while fetching the user info")
+		return
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	log.Debug().
