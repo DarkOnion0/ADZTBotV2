@@ -12,7 +12,7 @@ default:
   @just --list
 
 # Build ADZTBotV2 for all plateform
-build:
+build: install
     ./build.sh {{VERSION}}
 
 # Clean the remote GHCR container registry
@@ -24,7 +24,7 @@ cleanb:
     rm -rf ./bin
 
 # Lint the project files
-lint:
+lint: install
     @echo -e "\nLint all go files"
     golangci-lint run --verbose --fix --timeout 5m .
 
@@ -37,7 +37,7 @@ format:
     prettier -w .
 
 # Check the go.mod and the go.sum files
-check: format lint
+check: install format lint
     @echo -e "\nVerify dependencies have expected content"
     go mod verify
     
@@ -61,6 +61,10 @@ release_ci: build
 dev: format lint
     @echo -e "\nRun ADZTBotV2"
     go run main.go -db $DB -url $URL -chanm $CHANM -chanv $CHANV -token $TOKEN -admin $ADMIN -debug $DEBUG
+
+# Run the prerequisites to install all the missing deps that nix can't cover
+install:
+    go mod download
 
 # Aliases
 #alias b := build
