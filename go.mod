@@ -3,7 +3,7 @@ module github.com/DarkOnion0/ADZTBotV2
 go 1.17
 
 require (
-	github.com/bwmarrin/discordgo v0.25.0
+	github.com/bwmarrin/discordgo v0.26.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/rs/zerolog v1.27.0
 	go.mongodb.org/mongo-driver v1.10.1
