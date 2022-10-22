@@ -111,8 +111,14 @@ var (
 				},
 				{
 					Name:        "post",
-					Description: "Chose a post to display the stat from ",
+					Description: "Chose a post to display the stat from",
 					Type:        discordgo.ApplicationCommandOptionString,
+					Required:    false,
+				},
+				{
+					Name:        "ranking",
+					Description: "Display the global server ranking",
+					Type:        discordgo.ApplicationCommandOptionBoolean,
 					Required:    false,
 				},
 			},
@@ -554,11 +560,11 @@ var (
 			}
 
 			// execute this block only if the user exist in the db
-			if userExists && len(i.ApplicationCommandData().Options) != 2 {
+			if userExists && len(i.ApplicationCommandData().Options) == 1 {
 				// check which kind of stats should be done, on a user or a post ?
-				statsType := i.ApplicationCommandData().Options[0].Type.String()
+				statsType := i.ApplicationCommandData().Options[0].Name
 
-				if statsType == "String" {
+				if statsType == "post" {
 					log.Debug().
 						Str("userDiscordId", userDiscord.ID).
 						Str("type", "command").
@@ -583,7 +589,7 @@ var (
 						err1 := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 							Type: discordgo.InteractionResponseChannelMessageWithSource,
 							Data: &discordgo.InteractionResponseData{
-								Content: fmt.Sprintf("An error occured while executing the GetVote function: %s", err),
+								Content: fmt.Sprintf("An error occurred while executing the GetVote function: %s", err),
 							},
 						})
 						if err1 != nil {
@@ -619,7 +625,7 @@ var (
 						err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 							Type: discordgo.InteractionResponseChannelMessageWithSource,
 							Data: &discordgo.InteractionResponseData{
-								Content: fmt.Sprintf("An error occured while executing the GetDiscordID function: %s", err1),
+								Content: fmt.Sprintf("An error occurred while executing the GetDiscordID function: %s", err1),
 							},
 						})
 						if err != nil {
@@ -679,7 +685,7 @@ var (
 						return
 					}
 
-				} else if statsType == "Mentionable" {
+				} else if statsType == "user" {
 					log.Debug().
 						Str("userDiscordId", userDiscord.ID).
 						Str("type", "command").
@@ -824,6 +830,66 @@ var (
 							Str("type", "command").
 							Str("function", "stats").
 							Str("statsType", "user").
+							Msg("An error occurred while responding to the command interaction")
+						return
+					}
+				} else if statsType == "ranking" {
+					// return the global ranking of the whole serve
+					log.Debug().
+						Str("type", "module").
+						Str("module", "functions").
+						Str("function", "updateUserRanking").
+						Msg("Fetching all the user in the database")
+					err2, userStatsList := db.FetchAllUsers()
+
+					if err2 != nil {
+						log.Error().
+							Err(err2).
+							Str("type", "module").
+							Str("module", "functions").
+							Str("function", "updateUserRanking").
+							Msg("Something bad append while fetching all the users")
+
+						return
+					}
+					log.Debug().
+						Str("type", "module").
+						Str("module", "functions").
+						Str("function", "updateUserRanking").
+						Msg("All the user was fetched successfully")
+
+					// Limit the scoreboard to 10 users for big guild
+					if len(userStatsList) > 10 {
+						userStatsList = userStatsList[0:11]
+					}
+
+					var embedFields []*discordgo.MessageEmbedField
+
+					for _, userStats := range userStatsList {
+						userStatsDiscord := discordgo.User{ID: userStats.Userid}
+						embedFields = append(embedFields, &discordgo.MessageEmbedField{Name: fmt.Sprintf("👤 #%s - %s pts", strconv.Itoa(userStats.Rank), strconv.Itoa(userStats.GlobalScore)), Value: userStatsDiscord.Mention(), Inline: false})
+					}
+
+					err3 := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+						Type: discordgo.InteractionResponseChannelMessageWithSource,
+						Data: &discordgo.InteractionResponseData{
+							Embeds: []*discordgo.MessageEmbed{
+								{
+									Title:  "Server Score Ranking",
+									Color:  userDiscord.AccentColor,
+									Fields: embedFields,
+								},
+							},
+						},
+					})
+
+					if err3 != nil {
+						log.Error().
+							Err(err3).
+							Str("userDiscordId", userDiscord.ID).
+							Str("type", "command").
+							Str("function", "stats").
+							Str("statsType", "ranking").
 							Msg("An error occurred while responding to the command interaction")
 						return
 					}
