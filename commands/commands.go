@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 
 	"github.com/DarkOnion0/ADZTBotV2/config"
@@ -117,9 +118,23 @@ var (
 				},
 				{
 					Name:        "ranking",
-					Description: "Display the global server ranking",
-					Type:        discordgo.ApplicationCommandOptionBoolean,
-					Required:    false,
+					Description: "Display the global server ranking of the selected number of user",
+					Type:        discordgo.ApplicationCommandOptionInteger,
+					Choices: []*discordgo.ApplicationCommandOptionChoice{
+						{
+							Name:  "Top 3",
+							Value: 3,
+						},
+						{
+							Name:  "Top 5",
+							Value: 5,
+						},
+						{
+							Name:  "Top 10",
+							Value: 10,
+						},
+					},
+					Required: false,
 				},
 			},
 		},
@@ -859,15 +874,46 @@ var (
 						Msg("All the user was fetched successfully")
 
 					// Limit the scoreboard to 10 users for big guild
-					if len(userStatsList) > 10 {
+					if len(userStatsList) > int(i.ApplicationCommandData().Options[0].IntValue()) {
 						userStatsList = userStatsList[0:11]
 					}
 
+					// Sort user
+					sort.Slice(userStatsList, func(x, y int) bool {
+						return userStatsList[x].GlobalScore > userStatsList[y].GlobalScore
+					})
+
 					var embedFields []*discordgo.MessageEmbedField
 
+					// Create embed structure for every user
 					for _, userStats := range userStatsList {
+						emoji := "🔟"
+
 						userStatsDiscord := discordgo.User{ID: userStats.Userid}
-						embedFields = append(embedFields, &discordgo.MessageEmbedField{Name: fmt.Sprintf("👤 #%s - %s pts", strconv.Itoa(userStats.Rank), strconv.Itoa(userStats.GlobalScore)), Value: userStatsDiscord.Mention(), Inline: false})
+
+						// Add custom emoji for the 3 first users
+						switch userStats.Rank {
+						case 1:
+							emoji = "🥇"
+						case 2:
+							emoji = "🥈"
+						case 3:
+							emoji = "🥉"
+						case 4:
+							emoji = "4️⃣"
+						case 5:
+							emoji = "5️⃣"
+						case 6:
+							emoji = "6️⃣"
+						case 7:
+							emoji = "7️⃣"
+						case 8:
+							emoji = "8️⃣"
+						case 9:
+							emoji = "9️⃣"
+						}
+
+						embedFields = append(embedFields, &discordgo.MessageEmbedField{Name: fmt.Sprintf("%s - %s pts", emoji, strconv.Itoa(userStats.GlobalScore)), Value: userStatsDiscord.Mention(), Inline: false})
 					}
 
 					err3 := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -875,7 +921,7 @@ var (
 						Data: &discordgo.InteractionResponseData{
 							Embeds: []*discordgo.MessageEmbed{
 								{
-									Title:  "Server Score Ranking",
+									Title:  fmt.Sprintf("Server Score Ranking - Top %s", strconv.Itoa(int(i.ApplicationCommandData().Options[0].IntValue()))),
 									Color:  userDiscord.AccentColor,
 									Fields: embedFields,
 								},

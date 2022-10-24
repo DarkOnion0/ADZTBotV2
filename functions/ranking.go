@@ -38,7 +38,7 @@ func UpdateUserRanking() (err error) {
 		Str("type", "module").
 		Str("module", "functions").
 		Str("function", "updateUserRanking").
-		Msg("All the user was fetched successfully")
+		Msg("All the user was fetched succesemsfully")
 
 	sort.Slice(userStatsList, func(x, y int) bool {
 		return userStatsList[x].GlobalScore > userStatsList[y].GlobalScore
@@ -73,7 +73,6 @@ func UpdateUserRanking() (err error) {
 		Str("function", "updateUserRanking").
 		Msg("Finished updating the users rank successfully")
 
-	// TODO make a special command to see the top 3 / 10 of the server -> need to be sorted
 	// TODO document new codes since 113fed51d0715ee5fd650b10b30baa97760a43c5
 	// TODO add an updater to introduce the userInfo field of the db to other v1.0.0 instance
 
