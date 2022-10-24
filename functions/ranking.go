@@ -38,7 +38,7 @@ func UpdateUserRanking() (err error) {
 		Str("type", "module").
 		Str("module", "functions").
 		Str("function", "updateUserRanking").
-		Msg("All the user was fetched succesemsfully")
+		Msg("All the user was fetched successfully")
 
 	sort.Slice(userStatsList, func(x, y int) bool {
 		return userStatsList[x].GlobalScore > userStatsList[y].GlobalScore
