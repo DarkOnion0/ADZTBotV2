@@ -9,7 +9,6 @@ import (
 	"github.com/DarkOnion0/ADZTBotV2/commands"
 	"github.com/DarkOnion0/ADZTBotV2/config"
 	"github.com/DarkOnion0/ADZTBotV2/functions"
-	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog"
 
 	"github.com/bwmarrin/discordgo"
@@ -148,20 +147,16 @@ func main() {
 		Msg("User ranking update successfully")
 
 	/*
-		Cron job(s)
+		Timer job(s)
 	*/
-	c := cron.New()
+	go func() {
+		functions.UpdateUserRankingCron()
 
-	// set a cron job to update the user ranking every night at 23:59
-	// nolint
-	c.AddFunc(*config.Cron, functions.UpdateUserRankingCron)
-
-	// start all the cron jobs
-	c.Start()
-
-	defer func(c *cron.Cron) {
-		c.Stop()
-	}(c)
+		for {
+			time.Sleep(time.Duration(*config.Timer))
+			functions.UpdateUserRankingCron()
+		}
+	}()
 
 	/*
 		Discordgo initialization

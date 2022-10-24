@@ -26,25 +26,25 @@ pretty easy right ?!
 1. Download the binary from the release page
 2. Execute the command with the following flags (this flags can be get running the executable with the `-help` flag)
 
-   ```sh
-   -admin string
-        The bot administrator discord role ID (default "0")
-   -chanm string
-        Discord channel id where the post of the music category will be sent to
-   -chanv string
-        Discord channel id where the post of the video category will be sent to
-   -cron string
-        Set a custom cron scheduled for all the background tasks of the bot, run every night at 23:59 by default (default "59 23 * * *")
-   -db string
-        The mongodb database name
-   -debug string
-        Sets log level to debug true/(false) (default "false")
-   -guild string
-        Test guild ID. If not passed - bot registers commands.Commands globally
-   -token string
-        Bot access token
-   -url string
-        The mongodb access url
+   ```text
+     -admin string
+          The bot administrator discord role ID (default "0")
+     -chanm string
+          Discord channel id where the post of the music category will be sent to
+     -chanv string
+          Discord channel id where the post of the video category will be sent to
+     -db string
+          The mongodb database name
+     -debug string
+          Sets log level to debug true/(false) (default "false")
+     -guild string
+          Test guild ID. If not passed - bot registers commands.Commands globally
+     -timer int
+          Set a custom timer scheduled for all the background tasks of the bot, run every [X] nanoseconds (default 3600000000000)
+     -token string
+          Bot access token
+     -url string
+          The mongodb access url
    ```
 
 3. And that's it
@@ -84,7 +84,7 @@ Execute the following command and replace the env variables value by your own (y
 docker by the way)
 
 ```sh
-podman run -dt -e DB=$db -e URL=$url -e CHANM=$chanm -e CHANV=$chanv -e TOKEN=$token -e ADMIN=$admin -e DEBUG=$debug -e CRON=$cron adztbotv2 ghcr.io/darkonion0/adztbotv2:latest
+podman run -dt -e DB=$db -e URL=$url -e CHANM=$chanm -e CHANV=$chanv -e TOKEN=$token -e ADMIN=$admin -e DEBUG=$debug -e TIMER=$timer adztbotv2 ghcr.io/darkonion0/adztbotv2:latest
 ```
 
 #### 🌉 Supported Container Platform

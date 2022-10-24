@@ -60,7 +60,7 @@ release_ci: build
 # The command to run to dev ADZTBotV2
 dev: format lint
     @echo -e "\nRun ADZTBotV2"
-    go run main.go -db $DB -url $URL -chanm $CHANM -chanv $CHANV -token $TOKEN -admin $ADMIN -debug $DEBUG
+    go run main.go -db $DB -url $URL -chanm $CHANM -chanv $CHANV -token $TOKEN -admin $ADMIN -debug $DEBUG -timer $TIMER
 
 # Run the prerequisites to install all the missing deps that nix can't cover
 install:

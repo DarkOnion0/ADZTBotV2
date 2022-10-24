@@ -79,7 +79,15 @@ func UpdateUserRanking() (err error) {
 	return
 }
 
-// This function is used to warp the UpdateUserRanking function into a cron job
+// This function is used to warp the UpdateUserRanking function into a timer job
 func UpdateUserRankingCron() {
-	_ = UpdateUserRanking()
+	err := UpdateUserRanking()
+
+	if err != nil {
+		log.Error().
+			Err(err).
+			Str("type", "timer").
+			Str("function", "updateUserRanking").
+			Msg("Something bad append while updating the user ranking")
+	}
 }
