@@ -119,6 +119,27 @@ func main() {
 		}
 	}(config.Client)
 
+	// Init and update db
+	log.Debug().
+		Str("type", "main").
+		Str("function", "main").
+		Msg("Updating the bot")
+
+	err0 := functions.BotUpdater()
+
+	if err0 != nil {
+		log.Error().
+			Err(err0).
+			Str("type", "main").
+			Str("function", "main").
+			Msg("Something bad happen while updating the bot")
+	}
+
+	log.Info().
+		Str("type", "main").
+		Str("function", "main").
+		Msg("Updating the bot finished successfully")
+
 	/*
 		Custom script
 	*/

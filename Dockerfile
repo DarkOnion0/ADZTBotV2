@@ -2,12 +2,14 @@ FROM docker.io/library/golang:1.17 as builder
 
 WORKDIR /src/adztbotv2
 
+ARG VERSION
+
 # Copy project file
 COPY . .
 
 # Donwload and Install project
 RUN go get -d -v ./...
-RUN env CGO_ENABLED=0 go build -o ADZTBotV2 main.go
+RUN env CGO_ENABLED=0 go build -ldflags="-X 'github.com/DarkOnion0/ADZTBotV2/config.RawVersion=${VERSION}'"  -o ADZTBotV2 main.go
 
 # Create a new very lightweight image for the runtime
 FROM docker.io/library/alpine:latest

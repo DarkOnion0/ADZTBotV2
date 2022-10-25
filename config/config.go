@@ -3,6 +3,7 @@ package config
 import (
 	"flag"
 
+	"github.com/blang/semver/v4"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -12,13 +13,21 @@ func init() {
 
 var (
 	/*
+		LDFlags
+	*/
+
+	// The software/data structure version, in raw format directly from ldflags
+	// SHOULD NOT BE USED !
+	RawVersion string
+
+	/*
 		Constant
 	*/
 
 	// The mongodb client configuration
 	Client *mongo.Client
 	// The software/data structure version
-	Version string
+	Version = semver.MustParse(RawVersion)
 
 	/*
 		Command line flags
