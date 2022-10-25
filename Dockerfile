@@ -1,23 +1,9 @@
-FROM docker.io/library/golang:1.17 as builder
-
-WORKDIR /src/adztbotv2
-
-ARG VERSION
-
-# Copy project file
-COPY . .
-
-# Donwload and Install project
-RUN go get -d -v ./...
-RUN env CGO_ENABLED=0 go build -ldflags="-X 'github.com/DarkOnion0/ADZTBotV2/config.RawVersion=${VERSION}'"  -o ADZTBotV2 main.go
-
-# Create a new very lightweight image for the runtime
-FROM docker.io/library/alpine:latest
+FROM docker.io/library/busybox:stable-uclibc
 
 WORKDIR /src/adztbotv2
 
 # Copy the executable build i nthe previous step
-COPY --from=builder /src/adztbotv2/ADZTBotV2 /src/adztbotv2/
+COPY adztbotv2 .
 
 # Env variables
 ENV DB none
@@ -29,4 +15,4 @@ ENV ADMIN 0
 ENV DEBUG false
 ENV TIMER 3600000000000
 
-CMD ["sh", "-c", "./ADZTBotV2 -db $DB -url $URL -chanm $CHANM -chanv $CHANV -token $TOKEN -admin $ADMIN -debug $DEBUG -timer $TIMER"]
+CMD ["sh", "-c", "./adztbotv2 -db $DB -url $URL -chanm $CHANM -chanv $CHANV -token $TOKEN -admin $ADMIN -debug $DEBUG -timer $TIMER"]

@@ -1,0 +1,143 @@
+# Global settings
+project_name: adztbotv2
+
+# Binary
+before:
+  hooks:
+    # You may remove this if you don't use go modules.
+    - just check
+    # you may remove this if you don't need go generate
+    #- go generate ./...
+
+builds:
+  - ldflags:
+    - -X 'github.com/DarkOnion0/ADZTBotV2/config.RawVersion={{.Version}}'
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      #- windows
+      #- darwin
+    goarch:
+      - amd64
+      - "386"
+      - arm64
+      - arm
+    goarm:
+      - "6"
+      - "7"
+    goamd64:
+      - v1
+
+archives:
+  - replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+
+checksum:
+  name_template: "checksums.txt"
+
+snapshot:
+  name_template: "next"
+
+# Container
+dockers:
+  - image_templates:
+      ["ghcr.io/darkonion0/{{ .ProjectName }}:{{ .Version }}-amd64"]
+    dockerfile: Dockerfile
+    use: buildx
+    build_flag_templates:
+      - --platform=linux/amd64
+      - --label=org.opencontainers.image.title={{ .ProjectName }}
+      - --label=org.opencontainers.image.description={{ .ProjectName }}
+      - --label=org.opencontainers.image.url=https://github.com/darkonion0/{{ .ProjectName }}
+      - --label=org.opencontainers.image.source=https://github.com/darkonion0/{{ .ProjectName }}
+      - --label=org.opencontainers.image.version={{ .Version }}
+      - --label=org.opencontainers.image.created={{ .Date }}
+      - --label=org.opencontainers.image.revision={{ .FullCommit }}
+      - --label=org.opencontainers.image.licenses=GPL-3.0
+  - image_templates:
+      ["ghcr.io/darkonion0/{{ .ProjectName }}:{{ .Version }}-i386"]
+    goarch: "386"
+    dockerfile: Dockerfile
+    use: buildx
+    build_flag_templates:
+      - --platform=linux/386
+      - --label=org.opencontainers.image.title={{ .ProjectName }}
+      - --label=org.opencontainers.image.description={{ .ProjectName }}
+      - --label=org.opencontainers.image.url=https://github.com/darkonion0/{{ .ProjectName }}
+      - --label=org.opencontainers.image.source=https://github.com/darkonion0/{{ .ProjectName }}
+      - --label=org.opencontainers.image.version={{ .Version }}
+      - --label=org.opencontainers.image.created={{ .Date }}
+      - --label=org.opencontainers.image.revision={{ .FullCommit }}
+      - --label=org.opencontainers.image.licenses=GPL-3.0
+  - image_templates:
+      ["ghcr.io/darkonion0/{{ .ProjectName }}:{{ .Version }}-armv8"]
+    goarch: arm64
+    dockerfile: Dockerfile
+    use: buildx
+    build_flag_templates:
+      - --platform=linux/arm64/v8
+      - --label=org.opencontainers.image.title={{ .ProjectName }}
+      - --label=org.opencontainers.image.description={{ .ProjectName }}
+      - --label=org.opencontainers.image.url=https://github.com/darkonion0/{{ .ProjectName }}
+      - --label=org.opencontainers.image.source=https://github.com/darkonion0/{{ .ProjectName }}
+      - --label=org.opencontainers.image.version={{ .Version }}
+      - --label=org.opencontainers.image.created={{ .Date }}
+      - --label=org.opencontainers.image.revision={{ .FullCommit }}
+      - --label=org.opencontainers.image.licenses=GPL-3.0
+  - image_templates:
+      ["ghcr.io/darkonion0/{{ .ProjectName }}:{{ .Version }}-armv6"]
+    goarch: arm
+    goarm: "6"
+    dockerfile: Dockerfile
+    use: buildx
+    build_flag_templates:
+      - --platform=linux/arm/v6
+      - --label=org.opencontainers.image.title={{ .ProjectName }}
+      - --label=org.opencontainers.image.description={{ .ProjectName }}
+      - --label=org.opencontainers.image.url=https://github.com/darkonion0/{{ .ProjectName }}
+      - --label=org.opencontainers.image.source=https://github.com/darkonion0/{{ .ProjectName }}
+      - --label=org.opencontainers.image.version={{ .Version }}
+      - --label=org.opencontainers.image.created={{ .Date }}
+      - --label=org.opencontainers.image.revision={{ .FullCommit }}
+      - --label=org.opencontainers.image.licenses=GPL-3.0
+  - image_templates:
+      ["ghcr.io/darkonion0/{{ .ProjectName }}:{{ .Version }}-armv7"]
+    goarch: arm
+    goarm: "7"
+    dockerfile: Dockerfile
+    use: buildx
+    build_flag_templates:
+      - --platform=linux/arm/7
+      - --label=org.opencontainers.image.title={{ .ProjectName }}
+      - --label=org.opencontainers.image.description={{ .ProjectName }}
+      - --label=org.opencontainers.image.url=https://github.com/darkonion0/{{ .ProjectName }}
+      - --label=org.opencontainers.image.source=https://github.com/darkonion0/{{ .ProjectName }}
+      - --label=org.opencontainers.image.version={{ .Version }}
+      - --label=org.opencontainers.image.created={{ .Date }}
+      - --label=org.opencontainers.image.revision={{ .FullCommit }}
+      - --label=org.opencontainers.image.licenses=GPL-3.0
+docker_manifests:
+  - name_template: ghcr.io/darkonion0/{{ .ProjectName }}:{{ .Version }}
+    image_templates:
+      - ghcr.io/darkonion0/{{ .ProjectName }}:{{ .Version }}-amd64
+      - ghcr.io/darkonion0/{{ .ProjectName }}:{{ .Version }}-i386
+      - ghcr.io/darkonion0/{{ .ProjectName }}:{{ .Version }}-armv8
+      - ghcr.io/darkonion0/{{ .ProjectName }}:{{ .Version }}-armv7
+      - ghcr.io/darkonion0/{{ .ProjectName }}:{{ .Version }}-armv6
+
+  - name_template: ghcr.io/darkonion0/{{ .ProjectName }}:latest
+    image_templates:
+      - ghcr.io/darkonion0/{{ .ProjectName }}:{{ .Version }}-amd64
+      - ghcr.io/darkonion0/{{ .ProjectName }}:{{ .Version }}-i386
+      - ghcr.io/darkonion0/{{ .ProjectName }}:{{ .Version }}-armv8
+      - ghcr.io/darkonion0/{{ .ProjectName }}:{{ .Version }}-armv7
+      - ghcr.io/darkonion0/{{ .ProjectName }}:{{ .Version }}-armv6
+
+# Changelog
+changelog:
+  skip: true

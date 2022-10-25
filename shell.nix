@@ -20,6 +20,7 @@ pkgs.mkShell {
       # Go
       pkgs.go_1_17
       pkgs.golangci-lint
+      pkgs.goreleaser
 
       # Scripting
       pkgs.zip
