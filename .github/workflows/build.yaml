@@ -16,11 +16,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-
-      - uses: cachix/install-nix-action@v15
+      
+      - uses: actions/setup-node@v3
         with:
-          extra_nix_config: |
-            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+          node-version: 16
+
+      - name: Install prettier
+        run: npm install --save-dev --save-exact --global prettier
 
       - uses: extractions/setup-just@v1
 
@@ -28,6 +30,10 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: 1.17
+
+      - name: Install golanci-lint
+        run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.50.1
+
 
       - name: Build without publishing, goreleaser
         uses: goreleaser/goreleaser-action@v3
