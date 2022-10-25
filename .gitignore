@@ -6,7 +6,8 @@
 *.dylib
 
 # Remove the track of the build folder
-bin
+bin/
+dist/
 
 # Test binary, built with `go test -c`
 *.test
