@@ -1,6 +1,6 @@
 # ADZTBotV2
 
-[![Build](https://github.com/DarkOnion0/ADZTBotV2/actions/workflows/build.yaml/badge.svg)](https://github.com/DarkOnion0/ADZTBotV2/actions/workflows/build.yaml) [![Latest release](https://shields.io/github/v/release/DarkOnion0/ADZTBotV2?display_name=tag&include_prereleases&label=%F0%9F%93%A6%20Latest%20release)](https://shields.io/github/v/release/DarkOnion0/ADZTBotV2?display_name=tag&include_prereleases&label=%F0%9F%93%A6%20Latest%20release)
+[![Build](https://github.com/DarkOnion0/ADZTBotV2/actions/workflows/build.yaml/badge.svg)](https://github.com/DarkOnion0/ADZTBotV2/actions/workflows/build.yaml) [![Check code](https://github.com/DarkOnion0/ADZTBotV2/actions/workflows/check.yaml/badge.svg)](https://github.com/DarkOnion0/ADZTBotV2/actions/workflows/check.yaml) [![Latest release](https://shields.io/github/v/release/DarkOnion0/ADZTBotV2?display_name=tag&include_prereleases&label=%F0%9F%93%A6%20Latest%20release)](https://shields.io/github/v/release/DarkOnion0/ADZTBotV2?display_name=tag&include_prereleases&label=%F0%9F%93%A6%20Latest%20release)
 
 > A little discord bot with a small footprint and easy to use to share music and video with your friends on your discord server
 
