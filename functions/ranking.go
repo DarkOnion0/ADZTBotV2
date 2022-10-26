@@ -30,9 +30,9 @@ func UpdateUserRanking() (err error) {
 			Str("type", "module").
 			Str("module", "functions").
 			Str("function", "updateUserRanking").
-			Msg("Something bad append while fetching all the users")
+			Msg("Something bad happen while fetching all the users")
 
-		return errors.New("something bad append while fetching all the users")
+		return errors.New("Something bad happen while fetching all the users")
 	}
 	log.Debug().
 		Str("type", "module").
@@ -55,7 +55,7 @@ func UpdateUserRanking() (err error) {
 				Str("function", "updateUserRanking").
 				Str("userId", userStatsList[i].ID.Hex()).
 				Int("rank", i+1).
-				Msg("Something bad append while adding the user rank to the db")
+				Msg("Something bad happen while adding the user rank to the db")
 		} else {
 			log.Debug().
 				Str("type", "module").
@@ -88,6 +88,6 @@ func UpdateUserRankingCron() {
 			Err(err).
 			Str("type", "timer").
 			Str("function", "updateUserRanking").
-			Msg("Something bad append while updating the user ranking")
+			Msg("Something bad happen while updating the user ranking")
 	}
 }

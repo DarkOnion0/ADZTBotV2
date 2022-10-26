@@ -49,9 +49,9 @@ func CheckUser(userDiscordId string) (err error, isUserExist bool, userId primit
 			Str("module", "db").
 			Str("function", "checkUser").
 			Str("userDiscordId", userDiscordId).
-			Msg("Something bad append while finding the user in the database")
+			Msg("Something bad happen while finding the user in the database")
 
-		return errors.New("something bad append while finding the user in the database"), isUserExist, userList.ID
+		return errors.New("Something bad happen while finding the user in the database"), isUserExist, userList.ID
 	}
 
 	if len(userList.Userid) == 0 {
@@ -93,9 +93,9 @@ func RegisterUser(userDiscordId string) (err error) {
 			Str("function", "registerUser").
 			Str("userDiscordId", userDiscordId).
 			Bool("userStatus", userStatus).
-			Msg("Something bad append while checking the user")
+			Msg("Something bad happen while checking the user")
 
-		return errors.New("something bad append while checking the user in the database")
+		return errors.New("Something bad happen while checking the user in the database")
 	}
 
 	if !userStatus {
@@ -121,9 +121,9 @@ func RegisterUser(userDiscordId string) (err error) {
 				Str("function", "registerUser").
 				Str("userDiscordId", userDiscordId).
 				Bool("userStatus", userStatus).
-				Msg("Something bad append while adding the user in the database")
+				Msg("Something bad happen while adding the user in the database")
 
-			return errors.New("something bad append while adding the user in the database")
+			return errors.New("Something bad happen while adding the user in the database")
 		}
 
 		log.Info().
@@ -180,7 +180,7 @@ func GetDiscordId(userId primitive.ObjectID) (err error, userDiscordId string) {
 				Str("module", "db").
 				Str("function", "getDiscordId").
 				Str("userDiscordId", userDiscordId).
-				Msg("Something bad append while fetching the user id from the db, suer doesn't exist")
+				Msg("Something bad happen while fetching the user id from the db, suer doesn't exist")
 
 			return errors.New("user doesn't exists in the database"), ""
 		}
@@ -190,7 +190,7 @@ func GetDiscordId(userId primitive.ObjectID) (err error, userDiscordId string) {
 			Str("module", "db").
 			Str("function", "getDiscordId").
 			Str("userDiscordId", userDiscordId).
-			Msg("Something bad append while fetching the user id from the db")
+			Msg("Something bad happen while fetching the user id from the db")
 
 		return errors.New("an error occurred while fetching the user id from the db"), ""
 	}
@@ -238,7 +238,7 @@ func GetUserInfo(userId primitive.ObjectID) (err error, userStats types.UserInfo
 			Str("module", "db").
 			Str("function", "getUserInfo").
 			Str("userId", userId.Hex()).
-			Msg("Something bad append while fetching the user info")
+			Msg("Something bad happen while fetching the user info")
 		return
 	}
 
@@ -260,7 +260,7 @@ func GetUserInfo(userId primitive.ObjectID) (err error, userStats types.UserInfo
 				Str("module", "db").
 				Str("function", "getUserInfo").
 				Str("userId", userId.Hex()).
-				Msg("Something bad append while closing the cursor")
+				Msg("Something bad happen while closing the cursor")
 			return
 		}
 	}(cursor, ctx)
@@ -374,7 +374,7 @@ func FetchAllUsers() (err error, userStatsList []types.UserInfo) {
 				Str("type", "module").
 				Str("module", "db").
 				Str("function", "fetchAllUsers").
-				Msg("Something bad append while closing the cursor")
+				Msg("Something bad happen while closing the cursor")
 			return
 		}
 	}(cursor, ctx)
@@ -445,16 +445,16 @@ func FetchAllUsers() (err error, userStatsList []types.UserInfo) {
 					Str("type", "module").
 					Str("module", "db").
 					Str("function", "fetchAllUsers").
-					Msg("Something bad append, user has no post")
+					Msg("Something bad happen, user has no post")
 			default:
 				log.Error().
 					Err(err1).
 					Str("type", "module").
 					Str("module", "db").
 					Str("function", "fetchAllUsers").
-					Msg("Something bad append while fetching user info")
+					Msg("Something bad happen while fetching user info")
 
-				return errors.New("something bad append while fetching user info"), userStatsList
+				return errors.New("Something bad happen while fetching user info"), userStatsList
 			}
 		} else {
 			userStatsList = append(userStatsList, userStats)
@@ -515,7 +515,7 @@ func UpdateUser(userId primitive.ObjectID, dbKey string, dbValue interface{}) (e
 			Str("userId", userId.Hex()).
 			Str("dbKey", dbKey).
 			Interface("dbValue", dbValue).
-			Msg("Something bad append while updating the user info")
+			Msg("Something bad happen while updating the user info")
 
 		return errors.New("an error append while updating the user info")
 	}

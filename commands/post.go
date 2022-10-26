@@ -34,12 +34,12 @@ func post(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			Str("userDiscordId", userDiscord.ID).
 			Str("type", "command").
 			Str("function", "post").
-			Msg("Something bad append while checking the user")
+			Msg("Something bad happen while checking the user")
 
 		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
-				Content: "Something bad append while running the command",
+				Content: "Something bad happen while running the command",
 			},
 		})
 		if err != nil {

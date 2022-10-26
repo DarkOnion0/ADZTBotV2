@@ -124,9 +124,9 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 			Str("userVote", userVote).
 			Dict("post", zerolog.Dict().
 				Str("id", postId)).
-			Msg("Something bad append while converting from Hex to primitive.ObjectID")
+			Msg("Something bad happen while converting from Hex to primitive.ObjectID")
 
-		return errors.New("something bad append while converting from Hex to primitive.ObjectID"), false
+		return errors.New("Something bad happen while converting from Hex to primitive.ObjectID"), false
 	}
 
 	log.Debug().
@@ -169,7 +169,7 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 			Str("userVote", userVote).
 			Dict("post", zerolog.Dict().
 				Str("id", postId)).
-			Msg("Something bad append while fetching the post")
+			Msg("Something bad happen while fetching the post")
 
 		return errors.New("an error occurred while fetching the post"), false
 	} else {
@@ -236,7 +236,7 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 					Str("userVote", userVote).
 					Dict("post", zerolog.Dict().
 						Str("id", postId)).
-					Msg("Something bad append while adding the vote")
+					Msg("Something bad happen while adding the vote")
 
 				return errors.New("an error occurred while adding the vote"), false
 			}
@@ -282,7 +282,7 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 					Str("userVote", userVote).
 					Dict("post", zerolog.Dict().
 						Str("id", postId)).
-					Msg("Something bad append while updating the vote")
+					Msg("Something bad happen while updating the vote")
 
 				return errors.New("an error occurred while updating the vote"), false
 			}
@@ -326,9 +326,9 @@ func GetVote(postId string, userId primitive.ObjectID) (err error, globalVote in
 			Str("userId", userId.Hex()).
 			Dict("post", zerolog.Dict().
 				Str("id", postId)).
-			Msg("Something bad append while converting from Hex to primitive.ObjectID")
+			Msg("Something bad happen while converting from Hex to primitive.ObjectID")
 
-		return errors.New("something bad append while converting from Hex to primitive.ObjectID"), globalVote, userVote, postFetch
+		return errors.New("Something bad happen while converting from Hex to primitive.ObjectID"), globalVote, userVote, postFetch
 	}
 
 	// make a mongodb request to get the post information according to the provided postId
@@ -369,7 +369,7 @@ func GetVote(postId string, userId primitive.ObjectID) (err error, globalVote in
 			Str("userVote", userVote).
 			Dict("post", zerolog.Dict().
 				Str("id", postId)).
-			Msg("Something bad append while fetching the post")
+			Msg("Something bad happen while fetching the post")
 
 		return errors.New("an error occurred while fetching the post"), globalVote, userVote, postFetch
 		//return errors.New("An error occurred while fetching the post"), false
@@ -444,9 +444,9 @@ func DeletePost(postId, userId primitive.ObjectID, isBotAdmin bool) (err error) 
 			Bool("isBotAdmin", isBotAdmin).
 			Dict("post", zerolog.Dict().
 				Str("id", postId.Hex())).
-			Msg("Something bad append while searching the post in the db")
+			Msg("Something bad happen while searching the post in the db")
 
-		return errors.New("something bad append while searching the post in the db")
+		return errors.New("Something bad happen while searching the post in the db")
 	}
 
 	if postRecordFetch.User == userId || isBotAdmin {
@@ -474,9 +474,9 @@ func DeletePost(postId, userId primitive.ObjectID, isBotAdmin bool) (err error) 
 				Bool("isBotAdmin", isBotAdmin).
 				Dict("post", zerolog.Dict().
 					Str("id", postId.Hex())).
-				Msg("Something bad append while deleting the post")
+				Msg("Something bad happen while deleting the post")
 
-			return errors.New("something bad append while deleting the post")
+			return errors.New("Something bad happen while deleting the post")
 		}
 
 		log.Info().

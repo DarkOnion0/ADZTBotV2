@@ -40,7 +40,7 @@ func register(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: "Something bad append while registering your user id, you are already registered",
+					Content: "Something bad happen while registering your user id, you are already registered",
 				},
 			})
 			if err != nil {
@@ -56,7 +56,7 @@ func register(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: "Something bad append while registering your user id",
+					Content: "Something bad happen while registering your user id",
 				},
 			})
 			if err != nil {

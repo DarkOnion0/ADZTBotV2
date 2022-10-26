@@ -35,12 +35,12 @@ func stats(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			Str("userDiscordId", userDiscord.ID).
 			Str("type", "command").
 			Str("function", "stats").
-			Msg("Something bad append while checking the user")
+			Msg("Something bad happen while checking the user")
 
 		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
-				Content: "Something bad append while running the command",
+				Content: "Something bad happen while running the command",
 			},
 		})
 		if err != nil {
@@ -201,12 +201,12 @@ func stats(s *discordgo.Session, i *discordgo.InteractionCreate) {
 					Str("type", "command").
 					Str("function", "stats").
 					Str("statsType", "user").
-					Msg("Something bad append while checking the user")
+					Msg("Something bad happen while checking the user")
 
 				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
-						Content: "Something bad append while running the command",
+						Content: "Something bad happen while running the command",
 					},
 				})
 				if err != nil {
@@ -263,7 +263,7 @@ func stats(s *discordgo.Session, i *discordgo.InteractionCreate) {
 					Str("statsType", "user").
 					Dict("userStats", zerolog.Dict().
 						Str("id", userDbId.Hex())).
-					Msg("Something bad append while running the GetUserInfo command (user has no post, doesnt exist...)")
+					Msg("Something bad happen while running the GetUserInfo command (user has no post, doesnt exist...)")
 
 				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -345,7 +345,7 @@ func stats(s *discordgo.Session, i *discordgo.InteractionCreate) {
 					Str("type", "module").
 					Str("module", "functions").
 					Str("function", "updateUserRanking").
-					Msg("Something bad append while fetching all the users")
+					Msg("Something bad happen while fetching all the users")
 
 				return
 			}

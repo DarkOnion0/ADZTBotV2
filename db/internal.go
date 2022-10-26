@@ -56,7 +56,7 @@ func FetchVersion() (version semver.Version, err error) {
 			Str("type", "module").
 			Str("module", "db").
 			Str("function", "fetchVersion").
-			Msg("Something bad append while fetching the version")
+			Msg("Something bad happen while fetching the version")
 
 		err = errors.New("an error occurred while fetching the version")
 
@@ -100,9 +100,9 @@ func UpdateVersion(version semver.Version) (err error) {
 			Str("type", "module").
 			Str("module", "db").
 			Str("function", "updateVersion").
-			Msg("Something bad append while updating version in the database")
+			Msg("Something bad happen while updating version in the database")
 
-		return errors.New("something bad append while updating version in the database")
+		return errors.New("Something bad happen while updating version in the database")
 	}
 
 	log.Info().
@@ -139,9 +139,9 @@ func InitDB() (err error) {
 			Str("type", "module").
 			Str("module", "db").
 			Str("function", "initDB").
-			Msg("Something bad append while adding default info in the database")
+			Msg("Something bad happen while adding default info in the database")
 
-		return errors.New("something bad append while adding default version in the database")
+		return errors.New("Something bad happen while adding default version in the database")
 	}
 
 	log.Info().

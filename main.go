@@ -79,7 +79,7 @@ func main() {
 			Err(errMongo).
 			Str("type", "main").
 			Str("function", "main").
-			Msg("Something bad append while creating a the MongoDB client")
+			Msg("Something bad happen while creating a the MongoDB client")
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -91,7 +91,7 @@ func main() {
 			Err(errMongo).
 			Str("type", "main").
 			Str("function", "main").
-			Msg("Something bad append while connecting to MongoDB")
+			Msg("Something bad happen while connecting to MongoDB")
 	}
 
 	errMongo = config.Client.Ping(ctx, readpref.Primary())
@@ -100,7 +100,7 @@ func main() {
 			Err(errMongo).
 			Str("type", "main").
 			Str("function", "main").
-			Msg("Something bad append while pinging the database, is it online ?!")
+			Msg("Something bad happen while pinging the database, is it online ?!")
 	}
 
 	log.Info().

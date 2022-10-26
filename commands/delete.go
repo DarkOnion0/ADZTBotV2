@@ -47,12 +47,12 @@ func delete(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			Str("userDiscordId", i.Member.User.ID).
 			Str("type", "command").
 			Str("function", "delete").
-			Msg("Something bad append while checking the user")
+			Msg("Something bad happen while checking the user")
 
 		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
-				Content: "Something bad append while running the command",
+				Content: "Something bad happen while running the command",
 			},
 		})
 		if err != nil {
@@ -143,7 +143,7 @@ func delete(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: "Something bad append deleting the post: this postId does not exist 😞",
+					Content: "Something bad happen deleting the post: this postId does not exist 😞",
 				},
 			})
 
@@ -161,7 +161,7 @@ func delete(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: "Something bad append deleting the post: only user with the bot admin role or the post author can delete a post 😞",
+					Content: "Something bad happen deleting the post: only user with the bot admin role or the post author can delete a post 😞",
 				},
 			})
 
@@ -181,7 +181,7 @@ func delete(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
-				Content: "Something bad append while deleting the post 😞",
+				Content: "Something bad happen while deleting the post 😞",
 			},
 		})
 
