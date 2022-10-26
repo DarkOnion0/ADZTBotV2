@@ -11,7 +11,7 @@ before:
 
 builds:
   - ldflags:
-    - -X 'github.com/DarkOnion0/ADZTBotV2/config.RawVersion={{.Version}}'
+      - -X 'github.com/DarkOnion0/ADZTBotV2/config.RawVersion={{.Version}}'
     env:
       - CGO_ENABLED=0
     goos:
