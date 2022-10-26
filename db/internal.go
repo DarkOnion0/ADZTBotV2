@@ -24,6 +24,7 @@ func FetchVersion() (version semver.Version, err error) {
 		Str("function", "fetchVersion").
 		Msg("Running the function")
 
+	// init the collection
 	internalCollection := config.Client.Database(*config.DBName).Collection("internal")
 
 	log.Debug().
@@ -32,6 +33,7 @@ func FetchVersion() (version semver.Version, err error) {
 		Str("function", "fetchVersion").
 		Msg("Fetching the version information")
 
+	// Fetch the db internal info by retrieving the first document in the `internal` collection with the `version` key
 	var dbInfo types.DBInfo
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -75,7 +77,7 @@ func FetchVersion() (version semver.Version, err error) {
 	return
 }
 
-// This functions update the DB version
+// This function update the DB version
 func UpdateVersion(version semver.Version) (err error) {
 	log.Debug().
 		Str("type", "module").
@@ -86,6 +88,7 @@ func UpdateVersion(version semver.Version) (err error) {
 	// init the mongodb collection
 	internalCollection := config.Client.Database(*config.DBName).Collection("internal")
 
+	// update the version number in the db
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	log.Debug().
@@ -102,7 +105,7 @@ func UpdateVersion(version semver.Version) (err error) {
 			Str("function", "updateVersion").
 			Msg("Something bad happen while updating version in the database")
 
-		return errors.New("Something bad happen while updating version in the database")
+		return errors.New("something bad happen while updating version in the database")
 	}
 
 	log.Info().
@@ -125,6 +128,7 @@ func InitDB() (err error) {
 	// init the mongodb collection
 	internalCollection := config.Client.Database(*config.DBName).Collection("internal")
 
+	// set the db internal info(s)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	log.Debug().
@@ -141,7 +145,7 @@ func InitDB() (err error) {
 			Str("function", "initDB").
 			Msg("Something bad happen while adding default info in the database")
 
-		return errors.New("Something bad happen while adding default version in the database")
+		return errors.New("something bad happen while adding default version in the database")
 	}
 
 	log.Info().

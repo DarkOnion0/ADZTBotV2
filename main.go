@@ -141,33 +141,6 @@ func main() {
 		Msg("Updating the bot finished successfully")
 
 	/*
-		Custom script
-	*/
-
-	log.Debug().
-		Str("type", "main").
-		Str("function", "main").
-		Msg("Updating global user ranking")
-
-	// update the user ranking
-	err1 := functions.UpdateUserRanking()
-
-	if err1 != nil {
-		log.Fatal().
-			Err(err1).
-			Str("type", "main").
-			Str("function", "main").
-			Msg("An error occurred while closing the bot")
-
-		return
-	}
-
-	log.Info().
-		Str("type", "main").
-		Str("function", "main").
-		Msg("User ranking update successfully")
-
-	/*
 		Timer job(s)
 	*/
 	go func() {

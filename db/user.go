@@ -51,7 +51,7 @@ func CheckUser(userDiscordId string) (err error, isUserExist bool, userId primit
 			Str("userDiscordId", userDiscordId).
 			Msg("Something bad happen while finding the user in the database")
 
-		return errors.New("Something bad happen while finding the user in the database"), isUserExist, userList.ID
+		return errors.New("something bad happen while finding the user in the database"), isUserExist, userList.ID
 	}
 
 	if len(userList.Userid) == 0 {
@@ -95,7 +95,7 @@ func RegisterUser(userDiscordId string) (err error) {
 			Bool("userStatus", userStatus).
 			Msg("Something bad happen while checking the user")
 
-		return errors.New("Something bad happen while checking the user in the database")
+		return errors.New("something bad happen while checking the user in the database")
 	}
 
 	if !userStatus {
@@ -123,7 +123,7 @@ func RegisterUser(userDiscordId string) (err error) {
 				Bool("userStatus", userStatus).
 				Msg("Something bad happen while adding the user in the database")
 
-			return errors.New("Something bad happen while adding the user in the database")
+			return errors.New("something bad happen while adding the user in the database")
 		}
 
 		log.Info().
@@ -454,11 +454,11 @@ func FetchAllUsers() (err error, userStatsList []types.UserInfo) {
 					Str("function", "fetchAllUsers").
 					Msg("Something bad happen while fetching user info")
 
-				return errors.New("Something bad happen while fetching user info"), userStatsList
+				return errors.New("something bad happen while fetching user info"), userStatsList
 			}
-		} else {
-			userStatsList = append(userStatsList, userStats)
 		}
+
+		userStatsList = append(userStatsList, userStats)
 	}
 
 	log.Info().

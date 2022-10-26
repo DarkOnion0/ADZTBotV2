@@ -126,7 +126,7 @@ func SetVote(postId, userVote string, userId primitive.ObjectID) (error, bool) {
 				Str("id", postId)).
 			Msg("Something bad happen while converting from Hex to primitive.ObjectID")
 
-		return errors.New("Something bad happen while converting from Hex to primitive.ObjectID"), false
+		return errors.New("something bad happen while converting from Hex to primitive.ObjectID"), false
 	}
 
 	log.Debug().
@@ -328,7 +328,7 @@ func GetVote(postId string, userId primitive.ObjectID) (err error, globalVote in
 				Str("id", postId)).
 			Msg("Something bad happen while converting from Hex to primitive.ObjectID")
 
-		return errors.New("Something bad happen while converting from Hex to primitive.ObjectID"), globalVote, userVote, postFetch
+		return errors.New("something bad happen while converting from Hex to primitive.ObjectID"), globalVote, userVote, postFetch
 	}
 
 	// make a mongodb request to get the post information according to the provided postId
@@ -446,7 +446,7 @@ func DeletePost(postId, userId primitive.ObjectID, isBotAdmin bool) (err error) 
 				Str("id", postId.Hex())).
 			Msg("Something bad happen while searching the post in the db")
 
-		return errors.New("Something bad happen while searching the post in the db")
+		return errors.New("something bad happen while searching the post in the db")
 	}
 
 	if postRecordFetch.User == userId || isBotAdmin {
@@ -476,7 +476,7 @@ func DeletePost(postId, userId primitive.ObjectID, isBotAdmin bool) (err error) 
 					Str("id", postId.Hex())).
 				Msg("Something bad happen while deleting the post")
 
-			return errors.New("Something bad happen while deleting the post")
+			return errors.New("something bad happen while deleting the post")
 		}
 
 		log.Info().

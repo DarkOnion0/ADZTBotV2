@@ -32,7 +32,7 @@ func UpdateUserRanking() (err error) {
 			Str("function", "updateUserRanking").
 			Msg("Something bad happen while fetching all the users")
 
-		return errors.New("Something bad happen while fetching all the users")
+		return errors.New("something bad happen while fetching all the users")
 	}
 	log.Debug().
 		Str("type", "module").
@@ -40,10 +40,12 @@ func UpdateUserRanking() (err error) {
 		Str("function", "updateUserRanking").
 		Msg("All the user was fetched successfully")
 
+	// Order list in decreasing order
 	sort.Slice(userStatsList, func(x, y int) bool {
 		return userStatsList[x].GlobalScore > userStatsList[y].GlobalScore
 	})
 
+	// Add user rank to the DB
 	for i := 0; i < len(userStatsList); i++ {
 		err1 := db.UpdateUser(userStatsList[i].ID, "rank", i+1)
 
@@ -74,7 +76,6 @@ func UpdateUserRanking() (err error) {
 		Msg("Finished updating the users rank successfully")
 
 	// TODO document new codes since 113fed51d0715ee5fd650b10b30baa97760a43c5
-	// TODO add an updater to introduce the userInfo field of the db to other v1.0.0 instance
 
 	return
 }

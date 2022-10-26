@@ -27,20 +27,23 @@ func CountScorePost(postRecord types.PostRecordFetchT, userId primitive.ObjectID
 			Str("id", postRecord.ID.Hex())).
 		Msg("Running the function")
 
+	// Sum all the score of the provided post
 	for i := 0; i < len(postRecord.VoteList); i++ {
-		if postRecord.VoteList[i].User == userId {
-			if postRecord.VoteList[i].Vote == "+" {
+
+		// Convert the sign in number
+		if postRecord.VoteList[i].Vote == "+" {
+			globalVote += 1
+
+			// Fill the user specific choice
+			if postRecord.VoteList[i].User == userId {
 				userVote = "Like 👍"
-				globalVote += 1
-			} else {
-				userVote = "Dislike 👎"
-				globalVote += -1
 			}
 		} else {
-			if postRecord.VoteList[i].Vote == "+" {
-				globalVote += 1
-			} else {
-				globalVote += -1
+			globalVote -= 1
+
+			// Fill the user specific choice
+			if postRecord.VoteList[i].User == userId {
+				userVote = "Dislike 👎"
 			}
 		}
 	}
