@@ -53,7 +53,7 @@ func BotUpdater() (err error) {
 				Str("type", "module").
 				Str("module", "function").
 				Str("function", "botUpdater").
-				Msg("Something bad append while creating the base settings of the DB")
+				Msg("Something bad happen while creating the base settings of the DB")
 		}
 
 		return nil
@@ -63,7 +63,7 @@ func BotUpdater() (err error) {
 			Str("type", "module").
 			Str("module", "function").
 			Str("function", "botUpdater").
-			Msg("Something bad append while running the fetchVersion function")
+			Msg("Something bad happen while running the fetchVersion function")
 
 		return err1
 	}
@@ -132,9 +132,9 @@ func BotUpdater() (err error) {
 					Str("db", version.String()).
 					Str("bot", config.Version.String()).
 					Str("upgradingTo", v2_0_0.String())).
-				Msg("Something bad append while adding version in the database")
+				Msg("Something bad happen while adding version in the database")
 
-			return errors.New("something bad append while adding version in the database")
+			return errors.New("Something bad happen while adding version in the database")
 		}
 
 		log.Info().
@@ -174,9 +174,9 @@ func BotUpdater() (err error) {
 					Str("db", version.String()).
 					Str("bot", config.Version.String()).
 					Str("upgradingTo", v2_0_0.String())).
-				Msg("Something bad append while adding ranking in the database")
+				Msg("Something bad happen while adding ranking in the database")
 
-			return errors.New("something bad append while adding ranking in the database")
+			return errors.New("Something bad happen while adding ranking in the database")
 		}
 
 		log.Info().
@@ -192,7 +192,20 @@ func BotUpdater() (err error) {
 		version = v2_0_0
 	}
 
-	db.UpdateVersion(config.Version)
+	err7 := db.UpdateVersion(config.Version)
+
+	if err7 != nil {
+		log.Fatal().
+			Err(err7).
+			Str("type", "module").
+			Str("module", "function").
+			Str("function", "botUpdater").
+			Dict("version", zerolog.Dict().
+				Str("db", version.String()).
+				Str("bot", config.Version.String()).
+				Str("upgradingTo", v2_0_0.String())).
+			Msg("Something bad happen while updating version in the database")
+	}
 
 	return
 }
