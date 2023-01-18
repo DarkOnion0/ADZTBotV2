@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/blang/semver/v4 v4.0.0
-	github.com/bwmarrin/discordgo v0.26.1
+	github.com/bwmarrin/discordgo v0.27.0
 	github.com/rs/zerolog v1.28.0
 	go.mongodb.org/mongo-driver v1.11.1
 )
