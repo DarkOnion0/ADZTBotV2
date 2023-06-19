@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -54,7 +55,7 @@ func CheckUser(userDiscordId string) (err error, isUserExist bool, userId primit
 		return errors.New("something bad happen while finding the user in the database"), isUserExist, userList.ID
 	}
 
-	if len(userList.Userid) == 0 {
+	if len(userList.ID.String()) == 0 {
 		log.Info().
 			Str("type", "module").
 			Str("module", "db").
