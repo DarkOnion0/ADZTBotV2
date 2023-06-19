@@ -3,7 +3,6 @@ package config
 import (
 	"flag"
 
-	"github.com/blang/semver/v4"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -26,8 +25,6 @@ var (
 
 	// The mongodb client configuration
 	Client *mongo.Client
-	// The software/data structure version
-	Version = semver.MustParse(RawVersion)
 
 	/*
 		Command line flags
