@@ -4,9 +4,9 @@ go 1.19
 
 require (
 	github.com/blang/semver/v4 v4.0.0
-	github.com/bwmarrin/discordgo v0.27.0
-	github.com/rs/zerolog v1.29.0
-	go.mongodb.org/mongo-driver v1.11.2
+	github.com/bwmarrin/discordgo v0.27.1
+	github.com/rs/zerolog v1.29.1
+	go.mongodb.org/mongo-driver v1.11.7
 )
 
 require (
