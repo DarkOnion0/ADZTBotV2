@@ -42,7 +42,15 @@ func CheckUser(userDiscordId string) (err error, isUserExist bool, userId primit
 		Msg("Fetching the user information")
 	err1 := userInfoCollection.FindOne(ctx, bson.D{{Key: "userid", Value: userDiscordId}}).Decode(&userList)
 
-	if err1 != nil {
+	if err1 == mongo.ErrNoDocuments {
+		log.Info().
+			Str("type", "module").
+			Str("module", "db").
+			Str("function", "checkUser").
+			Str("userDiscordId", userDiscordId).
+			Msg("User doesn't exist in the database")
+		return nil, false, userList.ID
+	} else if err1 != nil {
 		log.Error().
 			Err(err1).
 			Str("type", "module").
@@ -54,24 +62,14 @@ func CheckUser(userDiscordId string) (err error, isUserExist bool, userId primit
 		return errors.New("something bad happen while finding the user in the database"), isUserExist, userList.ID
 	}
 
-	if len(userList.ID.String()) == 0 {
-		log.Info().
-			Str("type", "module").
-			Str("module", "db").
-			Str("function", "checkUser").
-			Str("userDiscordId", userDiscordId).
-			Msg("User doesn't exist in the database")
-		return nil, false, userList.ID
-	} else {
-		log.Info().
-			Str("type", "module").
-			Str("module", "db").
-			Str("function", "checkUser").
-			Str("userDiscordId", userDiscordId).
-			Str("userDiscordId", userList.ID.Hex()).
-			Msg("User exist in the database")
-		return nil, true, userList.ID
-	}
+	log.Info().
+		Str("type", "module").
+		Str("module", "db").
+		Str("function", "checkUser").
+		Str("userDiscordId", userDiscordId).
+		Str("userDiscordId", userList.ID.Hex()).
+		Msg("User exist in the database")
+	return nil, true, userList.ID
 }
 
 // RegisterUser register a user if it doesn't exist in the database using his discord id
